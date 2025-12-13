@@ -47,12 +47,6 @@ code {
 }
 
 @layer base {
-    body {
-        @apply bg-background text-foreground;
-    }
-}
-
-@layer base {
     [data-debug-wrapper="true"] {
         display: contents !important;
     }
