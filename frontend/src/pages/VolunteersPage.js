@@ -285,11 +285,11 @@ export default function VolunteersPage() {
             Faça a diferença na vida de quem precisa!
           </p>
           <Button
-            onClick={() => navigate('/auth?role=volunteer')}
+            onClick={() => navigate('/volunteer-register')}
             size="lg"
             className="rounded-full px-8 py-6 text-lg font-bold bg-primary hover:bg-primary-hover"
           >
-            🌟 Quero ser Voluntário
+            🌟 Cadastrar como Voluntário
           </Button>
         </div>
       </div>
