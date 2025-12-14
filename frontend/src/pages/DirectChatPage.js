@@ -63,25 +63,29 @@ export default function DirectChatPage() {
     }
   };
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  const sendMessage = async (messageData = {}) => {
+    if (!input.trim() && !messageData.location && !messageData.media) return;
 
     setSending(true);
     try {
+      const payload = {
+        to_user_id: userId,
+        message: input || (messageData.location ? '📍 Localização compartilhada' : '📎 Mídia compartilhada'),
+        ...messageData
+      };
+
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/messages`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          to_user_id: userId,
-          message: input
-        })
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
         setInput('');
+        setShowMediaOptions(false);
         fetchMessages();
       } else {
         toast.error('Erro ao enviar mensagem');
@@ -90,6 +94,34 @@ export default function DirectChatPage() {
       toast.error('Erro de conexão');
     } finally {
       setSending(false);
+    }
+  };
+
+  const sendLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          sendMessage({
+            location: {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            }
+          });
+          toast.success('Localização enviada!');
+        },
+        () => toast.error('Erro ao obter localização')
+      );
+    }
+  };
+
+  const sendMedia = (type) => {
+    const mediaUrl = prompt(`Cole a URL ${type === 'image' ? 'da imagem' : 'do vídeo'}:`);
+    if (mediaUrl) {
+      sendMessage({
+        media: [mediaUrl],
+        media_type: type
+      });
+      toast.success(`${type === 'image' ? 'Imagem' : 'Vídeo'} enviado!`);
     }
   };
 
