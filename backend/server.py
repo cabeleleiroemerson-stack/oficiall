@@ -319,11 +319,11 @@ async def get_posts(type: Optional[str] = None, category: Optional[str] = None, 
                 display_name = user.get('display_name') if user.get('use_display_name') else user['name']
                 post['user'] = {'name': display_name, 'role': user['role']}
         
-        # Se é voluntário e o post é do tipo "need" (precisa de ajuda)
-        # só mostrar se a categoria do post está nas categorias que o voluntário pode ajudar
-        if current_user.role == 'volunteer':
+        # Se é voluntário ou helper e o post é do tipo "need" (precisa de ajuda)
+        # só mostrar se a categoria do post está nas categorias que ele pode ajudar
+        if current_user.role in ['volunteer', 'helper']:
             if post['type'] == 'need':
-                # Se voluntário não tem categorias definidas ou a categoria do post está nas dele
+                # Se não tem categorias definidas ou a categoria do post está nas dele
                 if not user_help_categories or post['category'] in user_help_categories:
                     post['can_help'] = True
                     filtered_posts.append(post)
