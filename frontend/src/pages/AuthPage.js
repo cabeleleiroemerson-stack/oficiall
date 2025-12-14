@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../App';
@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
-import { ArrowLeft, Check, User, Heart, Shield } from 'lucide-react';
+import { ArrowLeft, Check, User, Heart, Shield, MapPin, Loader2 } from 'lucide-react';
 
 const HELP_CATEGORIES = [
   { value: 'food', label: 'Alimentação', icon: '🍽️', desc: 'Distribuição de alimentos, refeições' },
@@ -46,8 +46,14 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   
-  // Categorias selecionadas (para migrant = necessidades, para helper = áreas que quer ajudar)
+  // Categorias selecionadas
   const [selectedCategories, setSelectedCategories] = useState([]);
+  
+  // Localização
+  const [location, setLocation] = useState(null);
+  const [showLocation, setShowLocation] = useState(false);
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [locationAddress, setLocationAddress] = useState('');
   
   // Campos para voluntários (cadastro rápido)
   const [professionalArea, setProfessionalArea] = useState('legal');
@@ -67,6 +73,43 @@ export default function AuthPage() {
     );
   };
 
+  const getLocation = () => {
+    setLoadingLocation(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ lat: latitude, lng: longitude });
+          
+          // Tentar obter endereço via Nominatim (OpenStreetMap)
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            );
+            const data = await response.json();
+            if (data.display_name) {
+              setLocationAddress(data.display_name);
+            }
+          } catch (error) {
+            console.error('Error getting address:', error);
+          }
+          
+          setLoadingLocation(false);
+          toast.success('Localização obtida com sucesso!');
+        },
+        (error) => {
+          setLoadingLocation(false);
+          toast.error('Não foi possível obter sua localização');
+          console.error('Geolocation error:', error);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      setLoadingLocation(false);
+      toast.error('Geolocalização não suportada pelo navegador');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -76,12 +119,19 @@ export default function AuthPage() {
       return;
     }
     
-    // Validação para migrantes e helpers
-    if (!isLogin && (role === 'migrant' || role === 'helper') && selectedCategories.length === 0) {
-      toast.error(role === 'migrant' 
-        ? 'Selecione pelo menos uma categoria de ajuda que você precisa'
-        : 'Selecione pelo menos uma categoria que você quer ajudar'
-      );
+    // Se é helper e está na etapa 2, vai para etapa 3 (localização)
+    if (!isLogin && role === 'helper' && step === 2) {
+      if (selectedCategories.length === 0) {
+        toast.error('Selecione pelo menos uma categoria que você quer ajudar');
+        return;
+      }
+      setStep(3);
+      return;
+    }
+    
+    // Validação para migrantes
+    if (!isLogin && role === 'migrant' && selectedCategories.length === 0) {
+      toast.error('Selecione pelo menos uma categoria de ajuda que você precisa');
       return;
     }
     
@@ -101,7 +151,9 @@ export default function AuthPage() {
               need_categories: selectedCategories
             }),
             ...(role === 'helper' && {
-              help_categories: selectedCategories
+              help_categories: selectedCategories,
+              location: location ? { ...location, address: locationAddress } : null,
+              show_location: showLocation
             }),
             ...(role === 'volunteer' && {
               professional_area: professionalArea,
@@ -144,15 +196,25 @@ export default function AuthPage() {
   const getStepTitle = () => {
     if (isLogin) return t('login');
     if (step === 1) return t('register');
-    if (role === 'migrant') return 'O que você precisa?';
-    if (role === 'helper') return 'Como você quer ajudar?';
+    if (step === 2) {
+      if (role === 'migrant') return 'O que você precisa?';
+      if (role === 'helper') return 'Como você quer ajudar?';
+    }
+    if (step === 3 && role === 'helper') return 'Sua Localização';
     return t('register');
   };
 
   const getStepSubtitle = () => {
     if (step === 2 && role === 'migrant') return 'Selecione as áreas em que você precisa de ajuda';
     if (step === 2 && role === 'helper') return 'Selecione as áreas em que você pode oferecer ajuda';
+    if (step === 3 && role === 'helper') return 'Compartilhe sua localização para ajudar pessoas próximas';
     return null;
+  };
+
+  const getTotalSteps = () => {
+    if (role === 'helper') return 3;
+    if (role === 'migrant') return 2;
+    return 1;
   };
 
   return (
@@ -170,17 +232,18 @@ export default function AuthPage() {
         {!isLogin && (role === 'migrant' || role === 'helper') && (
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                step >= 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'
-              }`}>
-                1
-              </div>
-              <div className={`w-12 h-1 ${step >= 2 ? 'bg-primary' : 'bg-gray-200'}`}></div>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                step >= 2 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'
-              }`}>
-                2
-              </div>
+              {[...Array(getTotalSteps())].map((_, idx) => (
+                <React.Fragment key={idx}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                    step > idx ? 'bg-primary text-white' : step === idx + 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'
+                  }`}>
+                    {step > idx + 1 ? <Check size={16} /> : idx + 1}
+                  </div>
+                  {idx < getTotalSteps() - 1 && (
+                    <div className={`w-8 h-1 ${step > idx + 1 ? 'bg-primary' : 'bg-gray-200'}`}></div>
+                  )}
+                </React.Fragment>
+              ))}
             </div>
           </div>
         )}
@@ -379,6 +442,87 @@ export default function AuthPage() {
             </div>
           )}
 
+          {/* Step 3: Location (for helpers only) */}
+          {!isLogin && step === 3 && role === 'helper' && (
+            <div className="space-y-4">
+              <div className="bg-blue-50 rounded-2xl p-6 border-2 border-blue-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <MapPin size={24} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-textPrimary">Localização</h3>
+                    <p className="text-sm text-textSecondary">Ajude pessoas próximas de você</p>
+                  </div>
+                </div>
+
+                {!location ? (
+                  <Button
+                    type="button"
+                    onClick={getLocation}
+                    disabled={loadingLocation}
+                    className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {loadingLocation ? (
+                      <>
+                        <Loader2 size={18} className="mr-2 animate-spin" />
+                        Obtendo localização...
+                      </>
+                    ) : (
+                      <>
+                        <MapPin size={18} className="mr-2" />
+                        Obter Minha Localização
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="bg-green-100 rounded-xl p-3 border border-green-300">
+                      <p className="text-green-800 text-sm font-medium flex items-center gap-2">
+                        <Check size={18} />
+                        Localização obtida!
+                      </p>
+                      {locationAddress && (
+                        <p className="text-green-700 text-xs mt-1 line-clamp-2">{locationAddress}</p>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={getLocation}
+                      variant="outline"
+                      size="sm"
+                      className="w-full rounded-xl"
+                    >
+                      Atualizar Localização
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Opção de mostrar localização */}
+              <div className="bg-yellow-50 rounded-2xl p-4 border-2 border-yellow-200">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showLocation}
+                    onChange={(e) => setShowLocation(e.target.checked)}
+                    className="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <div>
+                    <p className="font-medium text-textPrimary">Mostrar minha localização no mapa</p>
+                    <p className="text-sm text-textSecondary">
+                      Pessoas que precisam de ajuda poderão ver você no mapa de ajudantes próximos
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+              <p className="text-xs text-center text-textMuted">
+                Você pode alterar essa configuração a qualquer momento no seu perfil
+              </p>
+            </div>
+          )}
+
           <Button
             type="submit"
             data-testid="submit-button"
@@ -391,7 +535,7 @@ export default function AuthPage() {
           >
             {loading ? 'Carregando...' : (
               isLogin ? t('login') : (
-                step === 1 && (role === 'migrant' || role === 'helper') ? 'Próximo' : t('register')
+                (step < getTotalSteps()) ? 'Próximo' : t('register')
               )
             )}
           </Button>
@@ -404,6 +548,8 @@ export default function AuthPage() {
               setIsLogin(!isLogin);
               setStep(1);
               setSelectedCategories([]);
+              setLocation(null);
+              setShowLocation(false);
             }}
             className="text-textSecondary hover:text-primary transition-colors"
           >
