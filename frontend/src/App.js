@@ -11,6 +11,7 @@ import AIChat from './pages/AIChat';
 import ServicesPage from './pages/ServicesPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
+import DirectChatPage from './pages/DirectChatPage';
 
 export const AuthContext = React.createContext();
 
