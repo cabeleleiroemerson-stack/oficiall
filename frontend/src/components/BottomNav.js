@@ -10,6 +10,7 @@ export default function BottomNav() {
 
   const navItems = [
     { icon: Home, label: 'Home', path: '/home', testId: 'nav-home' },
+    { icon: Users, label: 'Voluntários', path: '/volunteers', testId: 'nav-volunteers' },
     { icon: MessageCircle, label: 'Chat AI', path: '/chat', testId: 'nav-chat' },
     { icon: Search, label: 'Serviços', path: '/services', testId: 'nav-services' },
     { icon: User, label: 'Perfil', path: '/profile', testId: 'nav-profile' },
