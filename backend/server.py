@@ -180,6 +180,7 @@ async def register(user_data: UserRegister):
         user_dict['organization'] = user_data.organization
         user_dict['years_experience'] = user_data.years_experience
         user_dict['help_types'] = user_data.help_types or []
+        user_dict['help_categories'] = user_data.help_categories or []
         user_dict['phone'] = user_data.phone
         user_dict['linkedin'] = user_data.linkedin
     
