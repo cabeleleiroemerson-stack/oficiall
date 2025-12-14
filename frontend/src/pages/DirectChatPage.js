@@ -362,6 +362,7 @@ export default function DirectChatPage() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
