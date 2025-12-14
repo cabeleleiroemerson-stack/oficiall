@@ -463,7 +463,7 @@ export default function HomePage() {
                         data-testid="chat-with-user-button"
                         onClick={() => navigate(`/direct-chat/${post.user_id}`)}
                         size="sm"
-                        className="rounded-full bg-primary hover:bg-primary-hover"
+                        className="rounded-full bg-primary hover:bg-primary-hover text-white"
                       >
                         <MessageCircle size={16} className="mr-1" />
                         Conversar
