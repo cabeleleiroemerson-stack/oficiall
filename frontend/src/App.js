@@ -14,6 +14,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import DirectChatPage from './pages/DirectChatPage';
 import VolunteersPage from './pages/VolunteersPage';
 import VolunteerRegisterPage from './pages/VolunteerRegisterPage';
+import NearbyHelpersPage from './pages/NearbyHelpersPage';
 
 export const AuthContext = React.createContext();
 
