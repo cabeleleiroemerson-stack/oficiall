@@ -1,0 +1,199 @@
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../App';
+import { Button } from '../components/ui/button';
+import { Textarea } from '../components/ui/textarea';
+import { ArrowLeft, Send, User } from 'lucide-react';
+import { toast } from 'sonner';
+
+export default function DirectChatPage() {
+  const { userId } = useParams();
+  const { user: currentUser, token } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [otherUser, setOtherUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    fetchOtherUser();
+    fetchMessages();
+    const interval = setInterval(fetchMessages, 3000);
+    return () => clearInterval(interval);
+  }, [userId]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const fetchOtherUser = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setOtherUser(data);
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    }
+  };
+
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/messages/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data);
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+
+    setSending(true);
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          to_user_id: userId,
+          message: input
+        })
+      });
+
+      if (response.ok) {
+        setInput('');
+        fetchMessages();
+      } else {
+        toast.error('Erro ao enviar mensagem');
+      }
+    } catch (error) {
+      toast.error('Erro de conexão');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  return (
+    <div className="h-screen flex flex-col bg-background" data-testid="direct-chat-page">
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-10 glassmorphism">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/home')}
+              className="p-2 hover:bg-gray-100 rounded-full transition-all"
+              data-testid="back-button"
+            >
+              <ArrowLeft size={24} />
+            </button>
+            {otherUser && (
+              <>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <User size={20} className="text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-heading font-bold text-textPrimary" data-testid="other-user-name">
+                    {otherUser.name}
+                  </h1>
+                  <p className="text-sm text-textMuted capitalize">{otherUser.role}</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-4 py-6 pb-24">
+        <div className="max-w-3xl mx-auto space-y-4">
+          {loading ? (
+            <div className="text-center py-12 text-textMuted">Carregando mensagens...</div>
+          ) : messages.length === 0 ? (
+            <div className="text-center py-12 text-textMuted" data-testid="no-messages">
+              Nenhuma mensagem ainda. Comece a conversa!
+            </div>
+          ) : (
+            messages.map((msg, idx) => {
+              const isCurrentUser = msg.from_user_id === currentUser.id;
+              return (
+                <div 
+                  key={idx}
+                  data-testid={`message-${isCurrentUser ? 'sent' : 'received'}`}
+                  className={`flex gap-3 animate-fade-in ${
+                    isCurrentUser ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  {!isCurrentUser && (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 mt-1">
+                      <User size={18} className="text-white" />
+                    </div>
+                  )}
+                  <div className={`max-w-[80%] px-4 py-3 ${
+                    isCurrentUser ? 'chat-bubble-user' : 'chat-bubble-ai'
+                  }`}>
+                    <p className="leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                    <p className="text-xs mt-1 opacity-70">
+                      {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                  {isCurrentUser && (
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
+                      <User size={18} className="text-white" />
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      <div className="border-t border-gray-100 bg-white p-4">
+        <div className="max-w-3xl mx-auto flex gap-3">
+          <Textarea
+            data-testid="message-input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Digite sua mensagem..."
+            rows={1}
+            className="rounded-2xl resize-none"
+          />
+          <Button
+            data-testid="send-message-button"
+            onClick={sendMessage}
+            disabled={sending || !input.trim()}
+            className="rounded-full w-12 h-12 p-0 bg-primary hover:bg-primary-hover flex-shrink-0"
+          >
+            <Send size={20} />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
