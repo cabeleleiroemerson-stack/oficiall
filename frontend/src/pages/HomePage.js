@@ -633,48 +633,52 @@ export default function HomePage() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between border-t pt-3 mt-3">
-                  <div className="flex items-center gap-4 text-sm text-textMuted">
+                {/* Info do Post - Mobile Friendly */}
+                <div className="border-t pt-3 mt-3 space-y-3">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-textMuted flex-wrap">
                     <span className="flex items-center gap-1">
-                      <Clock size={16} />
+                      <Clock size={14} />
                       {new Date(post.created_at).toLocaleDateString('pt-BR')}
                     </span>
                     {post.type === 'need' && (
-                      <span className="text-green-600 font-medium">Precisa de ajuda</span>
+                      <span className="text-green-600 font-medium text-xs">Precisa de ajuda</span>
                     )}
                     {post.type === 'offer' && (
-                      <span className="text-primary font-medium">Oferece ajuda</span>
+                      <span className="text-primary font-medium text-xs">Oferece ajuda</span>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  
+                  {/* Botões em Grid Responsivo */}
+                  <div className="grid grid-cols-2 sm:flex gap-2">
                     {post.type === 'need' && (
                       <Button
                         onClick={() => openResourcesModal(post.category)}
                         size="sm"
                         variant="outline"
-                        className="rounded-full border-primary text-primary hover:bg-primary hover:text-white"
+                        className="rounded-full border-primary text-primary hover:bg-primary hover:text-white text-xs sm:text-sm px-3 py-2 w-full sm:w-auto"
                       >
-                        <Info size={16} className="mr-1" />
-                        Ver Recursos
+                        <Info size={14} className="sm:mr-1" />
+                        <span className="hidden sm:inline ml-1">Ver Recursos</span>
+                        <span className="sm:hidden ml-1">Recursos</span>
                       </Button>
                     )}
                     <Button
                       onClick={() => toggleComments(post.id)}
                       size="sm"
                       variant="outline"
-                      className="rounded-full"
+                      className="rounded-full text-xs sm:text-sm px-3 py-2 w-full sm:w-auto"
                     >
-                      <MessageSquare size={16} className="mr-1" />
-                      {showComments[post.id] ? 'Ocultar' : 'Comentários'}
+                      <MessageSquare size={14} className="sm:mr-1" />
+                      <span className="ml-1">{showComments[post.id] ? 'Ocultar' : 'Comentários'}</span>
                     </Button>
                     {post.user_id !== user.id && (
                       <Button
                         onClick={() => navigate(`/direct-chat/${post.user_id}`)}
                         size="sm"
-                        className="rounded-full bg-primary hover:bg-primary-hover text-white"
+                        className="rounded-full bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm px-3 py-2 w-full sm:w-auto col-span-2 sm:col-span-1"
                       >
-                        <MessageCircle size={16} className="mr-1" />
-                        Conversar
+                        <MessageCircle size={14} className="sm:mr-1" />
+                        <span className="ml-1">Conversar</span>
                       </Button>
                     )}
                   </div>
