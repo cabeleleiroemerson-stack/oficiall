@@ -144,17 +144,17 @@ export default function VolunteerRegisterPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-4 sm:py-8 px-2 sm:px-4">
       <div className="container mx-auto max-w-4xl">
         <button
           onClick={() => navigate('/auth')}
-          className="flex items-center gap-2 text-primary hover:text-primary-hover mb-6 font-medium"
+          className="flex items-center gap-2 text-primary hover:text-primary-hover mb-4 sm:mb-6 font-medium ml-2"
         >
           <ArrowLeft size={20} />
           Voltar
         </button>
 
-        <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-8 md:p-12">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-heading font-bold text-textPrimary mb-2">
               🤝 Cadastro de Voluntário Profissional
