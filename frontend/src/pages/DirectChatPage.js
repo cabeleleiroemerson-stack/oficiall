@@ -282,72 +282,73 @@ export default function DirectChatPage() {
         </div>
       </div>
 
-      <div className="border-t border-gray-100 bg-white p-4">
-        <div className="max-w-3xl mx-auto">
-          {showMediaOptions && (
-            <div className="flex gap-2 mb-3 p-3 bg-gray-50 rounded-2xl">
+      {canChat && (
+        <div className="border-t border-gray-100 bg-white p-4">
+          <div className="max-w-3xl mx-auto">
+            {showMediaOptions && (
+              <div className="flex gap-2 mb-3 p-3 bg-gray-50 rounded-2xl">
+                <Button
+                  data-testid="send-location-button"
+                  onClick={sendLocation}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 rounded-xl"
+                >
+                  <MapPin size={18} className="mr-2" />
+                  Localização
+                </Button>
+                <Button
+                  data-testid="send-image-button"
+                  onClick={() => fileInputRef.current?.click()}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 rounded-xl"
+                >
+                  <ImageIcon size={18} className="mr-2" />
+                  Foto
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload(e, 'image')}
+                  className="hidden"
+                />
+                <Button
+                  data-testid="send-video-button"
+                  onClick={() => videoInputRef.current?.click()}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 rounded-xl"
+                >
+                  <Video size={18} className="mr-2" />
+                  Vídeo
+                </Button>
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => handleFileUpload(e, 'video')}
+                  className="hidden"
+                />
+              </div>
+            )}
+            <div className="flex gap-3">
               <Button
-                data-testid="send-location-button"
-                onClick={sendLocation}
+                data-testid="toggle-media-button"
+                onClick={() => setShowMediaOptions(!showMediaOptions)}
                 variant="outline"
-                size="sm"
-                className="flex-1 rounded-xl"
+                className="rounded-full w-12 h-12 p-0 flex-shrink-0"
               >
-                <MapPin size={18} className="mr-2" />
-                Localização
+                <Paperclip size={20} />
               </Button>
-              <Button
-                data-testid="send-image-button"
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                size="sm"
-                className="flex-1 rounded-xl"
-              >
-                <ImageIcon size={18} className="mr-2" />
-                Foto
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileUpload(e, 'image')}
-                className="hidden"
-              />
-              <Button
-                data-testid="send-video-button"
-                onClick={() => videoInputRef.current?.click()}
-                variant="outline"
-                size="sm"
-                className="flex-1 rounded-xl"
-              >
-                <Video size={18} className="mr-2" />
-                Vídeo
-              </Button>
-              <input
-                ref={videoInputRef}
-                type="file"
-                accept="video/*"
-                onChange={(e) => handleFileUpload(e, 'video')}
-                className="hidden"
-              />
-            </div>
-          )}
-          <div className="flex gap-3">
-            <Button
-              data-testid="toggle-media-button"
-              onClick={() => setShowMediaOptions(!showMediaOptions)}
-              variant="outline"
-              className="rounded-full w-12 h-12 p-0 flex-shrink-0"
-            >
-              <Paperclip size={20} />
-            </Button>
-            <Textarea
-              data-testid="message-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Digite sua mensagem..."
-              rows={1}
+              <Textarea
+                data-testid="message-input"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Digite sua mensagem..."
+                rows={1}
               className="rounded-2xl resize-none"
             />
             <Button
