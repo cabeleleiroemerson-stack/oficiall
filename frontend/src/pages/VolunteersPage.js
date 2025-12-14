@@ -76,12 +76,12 @@ export default function VolunteersPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20" data-testid="volunteers-page">
-      <div className="bg-gradient-to-br from-primary to-secondary text-white py-8 px-4">
+      <div className="bg-gradient-to-br from-primary to-secondary text-white py-6 sm:py-8 px-4">
         <div className="container mx-auto max-w-4xl">
-          <h1 className="text-3xl font-heading font-bold mb-2">🤝 Profissionais Voluntários</h1>
-          <p className="text-white/90 mb-6">Conecte-se com profissionais que oferecem ajuda gratuita</p>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold mb-2">🤝 Profissionais Voluntários</h1>
+          <p className="text-sm sm:text-base text-white/90 mb-4 sm:mb-6">Conecte-se com profissionais que oferecem ajuda gratuita</p>
           
-          <div className="flex gap-3 flex-col sm:flex-row">
+          <div className="flex gap-2 sm:gap-3 flex-col sm:flex-row">
             <div className="flex-1 relative">
               <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <Input
