@@ -276,9 +276,12 @@ async def get_posts(type: Optional[str] = None, category: Optional[str] = None):
         if isinstance(post['created_at'], str):
             post['created_at'] = datetime.fromisoformat(post['created_at'])
         
-        user = await db.users.find_one({'id': post['user_id']}, {'_id': 0, 'password': 0, 'email': 0})
-        if user:
-            post['user'] = {'name': user['name'], 'role': user['role']}
+        if post['user_id'] == 'system':
+            post['user'] = {'name': 'Watizat Assistant', 'role': 'assistant'}
+        else:
+            user = await db.users.find_one({'id': post['user_id']}, {'_id': 0, 'password': 0, 'email': 0})
+            if user:
+                post['user'] = {'name': user['name'], 'role': user['role']}
     
     return posts
 
