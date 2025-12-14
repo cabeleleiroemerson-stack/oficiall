@@ -17,6 +17,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen gradient-bg">
+      {/* Language Selector */}
       <div className="absolute top-6 right-6 flex gap-2" data-testid="language-selector">
         {languages.map(lang => (
           <button
@@ -35,13 +36,15 @@ export default function LandingPage() {
       </div>
 
       <div className="container mx-auto px-4 pt-20 pb-12">
-        <div className="max-w-4xl mx-auto text-center animate-fade-in">
+        <div className="max-w-5xl mx-auto text-center animate-fade-in">
+          {/* Logo */}
           <div className="flex justify-center mb-8">
             <div className="p-6 bg-white/80 backdrop-blur-sm rounded-3xl shadow-card">
               <Globe size={64} className="text-primary" />
             </div>
           </div>
 
+          {/* Title */}
           <h1 
             className="text-5xl md:text-7xl font-heading font-bold text-textPrimary mb-6"
             data-testid="landing-title"
@@ -53,47 +56,83 @@ export default function LandingPage() {
             Conectando migrantes e ajudantes em Paris. Encontre apoio, ofereça ajuda, construa comunidade.
           </p>
 
-          {/* Cards principais */}
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-8">
+          {/* 3 Cards em linha */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+            {/* Card 1: Preciso de Ajuda */}
             <div 
-              className="bg-white rounded-3xl p-8 shadow-card card-hover cursor-pointer"
+              className="bg-white rounded-3xl p-6 shadow-card card-hover cursor-pointer border-2 border-transparent hover:border-green-400 transition-all"
               onClick={() => navigate('/auth?role=migrant')}
               data-testid="need-help-card"
             >
               <div className="flex justify-center mb-4">
                 <div className="p-4 bg-green-100 rounded-2xl">
-                  <HandHeart size={48} className="text-green-600" />
+                  <HandHeart size={40} className="text-green-600" />
                 </div>
               </div>
-              <h2 className="text-2xl font-heading font-bold text-textPrimary mb-3">
+              <h2 className="text-xl font-heading font-bold text-textPrimary mb-2">
                 {t('needHelp')}
               </h2>
-              <p className="text-textSecondary">
+              <p className="text-sm text-textSecondary mb-4">
                 Encontre ajuda com trabalho, moradia, alimentação, serviços jurídicos e mais.
               </p>
+              <Button 
+                className="w-full rounded-full bg-green-600 hover:bg-green-700 text-white"
+              >
+                Começar
+              </Button>
             </div>
 
+            {/* Card 2: Quero Ajudar */}
             <div 
-              className="bg-white rounded-3xl p-8 shadow-card card-hover cursor-pointer"
+              className="bg-white rounded-3xl p-6 shadow-card card-hover cursor-pointer border-2 border-transparent hover:border-orange-400 transition-all"
               onClick={() => navigate('/auth?role=helper')}
               data-testid="want-to-help-card"
             >
               <div className="flex justify-center mb-4">
                 <div className="p-4 bg-orange-100 rounded-2xl">
-                  <HeartHandshake size={48} className="text-primary" />
+                  <HeartHandshake size={40} className="text-primary" />
                 </div>
               </div>
-              <h2 className="text-2xl font-heading font-bold text-textPrimary mb-3">
+              <h2 className="text-xl font-heading font-bold text-textPrimary mb-2">
                 {t('wantToHelp')}
               </h2>
-              <p className="text-textSecondary">
+              <p className="text-sm text-textSecondary mb-4">
                 Ofereça seu apoio, compartilhe recursos e faça a diferença na vida de alguém.
               </p>
+              <Button 
+                className="w-full rounded-full bg-primary hover:bg-primary-hover text-white"
+              >
+                Começar
+              </Button>
+            </div>
+
+            {/* Card 3: Voluntário Profissional */}
+            <div 
+              className="bg-white rounded-3xl p-6 shadow-card card-hover cursor-pointer border-2 border-transparent hover:border-blue-400 transition-all"
+              onClick={() => navigate('/volunteer-register')}
+              data-testid="volunteer-card"
+            >
+              <div className="flex justify-center mb-4">
+                <div className="p-4 bg-blue-100 rounded-2xl">
+                  <Shield size={40} className="text-blue-600" />
+                </div>
+              </div>
+              <h2 className="text-xl font-heading font-bold text-textPrimary mb-2">
+                Voluntário Profissional
+              </h2>
+              <p className="text-sm text-textSecondary mb-4">
+                Advogados, médicos e outros profissionais oferecendo serviços voluntários.
+              </p>
+              <Button 
+                className="w-full rounded-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Cadastrar
+              </Button>
             </div>
           </div>
 
           {/* Login button */}
-          <div className="mb-16">
+          <div className="mb-12">
             <p className="text-textMuted mb-4">Já tem uma conta?</p>
             <Button 
               data-testid="login-button"
@@ -107,68 +146,41 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Seção para Voluntários Profissionais */}
-      <div className="bg-gradient-to-br from-primary/10 to-secondary/10 py-16">
+      {/* Info Section */}
+      <div className="bg-white/50 py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 bg-primary/20 px-4 py-2 rounded-full mb-4">
-                <Shield size={20} className="text-primary" />
-                <span className="text-primary font-medium">Para Profissionais</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-heading font-bold text-textPrimary mb-4">
-                Seja um Voluntário Profissional
-              </h2>
-              <p className="text-lg text-textSecondary max-w-2xl mx-auto">
-                Advogados, médicos, psicólogos, assistentes sociais e outros profissionais podem 
-                oferecer seus serviços de forma voluntária e fazer a diferença.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6 mb-10">
-              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-                <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Award size={28} className="text-blue-600" />
+            <h2 className="text-3xl font-heading font-bold text-textPrimary mb-8 text-center">
+              Como Funciona
+            </h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-primary">1</span>
                 </div>
-                <h3 className="font-bold text-textPrimary mb-2">Cadastro Verificado</h3>
+                <h3 className="font-bold text-textPrimary mb-2">Cadastre-se</h3>
                 <p className="text-sm text-textSecondary">
-                  Perfil profissional com áreas de especialização e credenciais
+                  Crie sua conta e selecione as áreas de interesse
                 </p>
               </div>
-
-              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-                <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Users size={28} className="text-green-600" />
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-primary">2</span>
                 </div>
-                <h3 className="font-bold text-textPrimary mb-2">Conexões Direcionadas</h3>
+                <h3 className="font-bold text-textPrimary mb-2">Conecte-se</h3>
                 <p className="text-sm text-textSecondary">
-                  Receba pedidos de ajuda apenas nas suas áreas de expertise
+                  Encontre pessoas que precisam ou oferecem ajuda
                 </p>
               </div>
-
-              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-                <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <HeartHandshake size={28} className="text-purple-600" />
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-primary">3</span>
                 </div>
-                <h3 className="font-bold text-textPrimary mb-2">Impacto Real</h3>
+                <h3 className="font-bold text-textPrimary mb-2">Ajude</h3>
                 <p className="text-sm text-textSecondary">
-                  Ajude quem realmente precisa com suas habilidades profissionais
+                  Converse, compartilhe recursos e construa comunidade
                 </p>
               </div>
-            </div>
-
-            <div className="text-center">
-              <Button
-                data-testid="volunteer-register-button"
-                onClick={() => navigate('/volunteer-register')}
-                className="rounded-full px-10 py-6 text-lg font-bold bg-primary hover:bg-primary-hover shadow-lg"
-              >
-                <Shield size={24} className="mr-2" />
-                Cadastrar como Voluntário Profissional
-              </Button>
-              <p className="text-sm text-textMuted mt-4">
-                Cadastro completo com validação de credenciais profissionais
-              </p>
             </div>
           </div>
         </div>
