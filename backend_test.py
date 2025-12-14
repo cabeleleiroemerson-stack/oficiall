@@ -555,6 +555,58 @@ class WatizatAPITester:
         
         return True
 
+    def run_help_categories_tests(self):
+        """Run tests specifically for help categories functionality"""
+        print("\n🎯 Starting Help Categories Feature Tests...")
+        print(f"📍 Base URL: {self.base_url}")
+        
+        # Initialize test variables
+        self.volunteer_token = None
+        self.volunteer_id = None
+        self.migrant_token = None
+        self.migrant_id = None
+        self.food_post_id = None
+        self.legal_post_id = None
+        
+        # Test basic connectivity
+        self.test_root_endpoint()
+        
+        # Test 1: Register migrant
+        print("\n📝 Step 1: Register migrant user")
+        if not self.test_migrant_registration():
+            print("❌ Migrant registration failed. Stopping help categories tests.")
+            return False
+        
+        # Test 2: Create posts as migrant (food and legal categories)
+        print("\n📝 Step 2: Create posts with different categories")
+        if not self.test_create_posts_different_categories():
+            print("❌ Post creation failed. Stopping help categories tests.")
+            return False
+        
+        # Test 3: Register volunteer with help_categories=['food', 'health']
+        print("\n📝 Step 3: Register volunteer with help_categories")
+        if not self.test_volunteer_registration_with_help_categories():
+            print("❌ Volunteer registration failed. Stopping help categories tests.")
+            return False
+        
+        # Test 4: Test post filtering for volunteer
+        print("\n📝 Step 4: Test post filtering for volunteer")
+        self.test_volunteer_post_filtering()
+        
+        # Test 5: Test can-chat endpoint (positive case)
+        print("\n📝 Step 5: Test can-chat endpoint (should allow chat)")
+        self.test_can_chat_endpoint_positive()
+        
+        # Test 6: Test with education volunteer (negative cases)
+        print("\n📝 Step 6: Test education volunteer (should not see need posts)")
+        self.test_education_volunteer_post_filtering()
+        
+        # Test 7: Test can-chat endpoint (negative case)
+        print("\n📝 Step 7: Test can-chat endpoint (should deny chat)")
+        self.test_can_chat_endpoint_negative()
+        
+        return True
+
     def print_summary(self):
         """Print test summary"""
         print(f"\n📊 Test Summary:")
