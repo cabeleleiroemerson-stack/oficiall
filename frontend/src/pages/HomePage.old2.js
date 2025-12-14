@@ -4,106 +4,13 @@ import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '../components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
 import BottomNav from '../components/BottomNav';
-import { Plus, MapPin, User, Clock, MessageCircle, Image as ImageIcon, MessageSquare, Send, X, Filter, Info, ExternalLink } from 'lucide-react';
+import { Plus, MapPin, User, Clock, MessageCircle, Image as ImageIcon, MessageSquare, Send, X, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-
-const RESOURCES_INFO = {
-  work: {
-    icon: '💼',
-    title: 'Recursos para Emprego',
-    items: [
-      { name: 'France Travail', desc: 'Serviço público para encontrar emprego', link: 'https://www.francetravail.fr' },
-      { name: 'ENIC-NARIC', desc: 'Reconhecimento de diplomas', link: 'https://www.france-education-international.fr' },
-      { name: 'Mission Locale', desc: 'Para jovens 16-25 anos' }
-    ]
-  },
-  housing: {
-    icon: '🏠',
-    title: 'Recursos para Moradia',
-    items: [
-      { name: 'SAMU Social - 115', desc: 'Emergência 24/7 gratuito', urgent: true },
-      { name: 'Logement Social (HLM)', desc: 'Aluguel adaptado aos rendimentos', link: 'https://www.demande-logement-social.gouv.fr' },
-      { name: 'France Terre d\'Asile', desc: '24 Rue Marc Seguin, 75018 Paris • 01 53 04 39 99' }
-    ]
-  },
-  legal: {
-    icon: '⚖️',
-    title: 'Assistência Jurídica',
-    items: [
-      { name: 'La Cimade', desc: 'Assistência jurídica gratuita • 176 Rue de Grenelle, 75007 Paris' },
-      { name: 'GISTI', desc: 'Direitos dos estrangeiros • 3 Villa Marcès, 75011 Paris' },
-      { name: 'OFPRA', desc: 'Asilo e proteção' }
-    ]
-  },
-  health: {
-    icon: '🏥',
-    title: 'Recursos de Saúde',
-    items: [
-      { name: 'SAMU - 15', desc: 'Emergências médicas', urgent: true },
-      { name: 'PASS', desc: 'Atendimento gratuito • Hôpital Saint-Louis' },
-      { name: 'AME', desc: 'Cobertura de saúde gratuita' }
-    ]
-  },
-  food: {
-    icon: '🍽️',
-    title: 'Alimentação',
-    items: [
-      { name: 'Restaurants du Cœur', desc: 'Refeições gratuitas • 42 Rue Championnet, 75018' },
-      { name: 'Secours Catholique', desc: 'Distribuição de alimentos • 15 Rue de Maubeuge, 75009' },
-      { name: 'Croix-Rouge', desc: 'Alimentos e produtos básicos' }
-    ]
-  },
-  education: {
-    icon: '📚',
-    title: 'Educação',
-    items: [
-      { name: 'CASNAV', desc: 'Escolarização de crianças • 12 Boulevard d\'Indochine, 75019' },
-      { name: 'Universidades', desc: 'Programas especiais para refugiados' },
-      { name: 'ENIC-NARIC', desc: 'Validação de diplomas' }
-    ]
-  },
-  social: {
-    icon: '🤝',
-    title: 'Apoio Social',
-    items: [
-      { name: 'Emmaüs Solidarité', desc: 'Apoio social • 4 Rue des Amandiers, 75020' },
-      { name: 'CAF', desc: 'Ajuda financeira', link: 'https://www.caf.fr' },
-      { name: 'France Bénévolat', desc: 'Voluntariado' }
-    ]
-  },
-  clothes: {
-    icon: '👕',
-    title: 'Roupas',
-    items: [
-      { name: 'Croix-Rouge Vestiaire', desc: 'Roupas gratuitas • 43 Rue de Valmy, 93100' },
-      { name: 'Emmaüs', desc: 'Roupas e calçados a preços baixos' },
-      { name: 'Secours Catholique', desc: 'Vestiários sociais' }
-    ]
-  },
-  furniture: {
-    icon: '🪑',
-    title: 'Móveis',
-    items: [
-      { name: 'Emmaüs', desc: 'Móveis acessíveis' },
-      { name: 'Ressourceries', desc: 'Móveis de segunda mão' },
-      { name: 'Donnons.org', desc: 'Doações online', link: 'https://donnons.org' }
-    ]
-  },
-  transport: {
-    icon: '🚗',
-    title: 'Transporte',
-    items: [
-      { name: 'Navigo', desc: 'Tarifas reduzidas disponíveis' },
-      { name: 'Mob\'In France', desc: 'Formação para carteira de motorista' },
-      { name: 'Vélib\'', desc: 'Bicicletas públicas' }
-    ]
-  }
-};
 
 export default function HomePage() {
   const { user, token } = useContext(AuthContext);
@@ -114,8 +21,6 @@ export default function HomePage() {
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
-  const [showResourcesModal, setShowResourcesModal] = useState(false);
-  const [selectedResourceCategory, setSelectedResourceCategory] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [newPost, setNewPost] = useState({
@@ -173,7 +78,7 @@ export default function HomePage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setPosts(data.filter(p => !p.is_auto_response));
+        setPosts(data);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -200,9 +105,6 @@ export default function HomePage() {
 
       if (response.ok) {
         toast.success('Post criado!');
-        if (newPost.type === 'need') {
-          toast.info('📩 Verifique suas mensagens para recursos úteis!', { duration: 5000 });
-        }
         setShowCreatePost(false);
         setNewPost({ type: user?.role === 'migrant' ? 'need' : 'offer', category: 'food', title: '', description: '', images: [], location: null });
         fetchPosts();
@@ -299,11 +201,6 @@ export default function HomePage() {
     }
   };
 
-  const openResourcesModal = (category) => {
-    setSelectedResourceCategory(category);
-    setShowResourcesModal(true);
-  };
-
   const getCategoryStyle = (category) => {
     return categories.find(c => c.value === category)?.color || 'bg-gray-100 text-gray-700';
   };
@@ -318,8 +215,10 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-2xl font-heading font-bold text-textPrimary mb-4">Feed</h1>
           
+          {/* Filtros */}
           <div className="flex gap-3 overflow-x-auto pb-2">
             <Button
+              data-testid="filter-all"
               onClick={() => setCategoryFilter('all')}
               variant={categoryFilter === 'all' ? 'default' : 'outline'}
               size="sm"
@@ -331,6 +230,7 @@ export default function HomePage() {
             {categories.map(cat => (
               <Button
                 key={cat.value}
+                data-testid={`filter-${cat.value}`}
                 onClick={() => setCategoryFilter(cat.value)}
                 variant={categoryFilter === cat.value ? 'default' : 'outline'}
                 size="sm"
@@ -382,21 +282,15 @@ export default function HomePage() {
               {user?.role === 'migrant' ? 'Preciso de Ajuda' : 'Oferecer Ajuda'}
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-3xl max-w-2xl max-h-[85vh]" data-testid="create-post-dialog">
+          <DialogContent className="rounded-3xl max-w-lg" data-testid="create-post-dialog">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-heading">
-                {newPost.type === 'need' ? '🆘 Preciso de Ajuda' : '🤝 Quero Ajudar'}
-              </DialogTitle>
-              <DialogDescription>
-                Preencha as informações abaixo para publicar
-              </DialogDescription>
+              <DialogTitle className="text-2xl font-heading">Criar Post</DialogTitle>
             </DialogHeader>
-            <div className="space-y-6 overflow-y-auto max-h-[calc(85vh-120px)] pr-2">
-              {/* Categoria */}
-              <div className="bg-gray-50 p-4 rounded-2xl">
-                <Label className="text-base font-bold mb-2 block">📂 Categoria</Label>
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+              <div>
+                <Label>Categoria</Label>
                 <Select value={newPost.category} onValueChange={(v) => setNewPost({...newPost, category: v})}>
-                  <SelectTrigger data-testid="category-select" className="rounded-xl h-12">
+                  <SelectTrigger data-testid="category-select" className="rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -409,149 +303,86 @@ export default function HomePage() {
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Título */}
-              <div className="bg-gray-50 p-4 rounded-2xl">
-                <Label className="text-base font-bold mb-2 block">✏️ Título</Label>
+              <div>
+                <Label>Título</Label>
                 <Input
                   data-testid="post-title-input"
                   value={newPost.title}
                   onChange={(e) => setNewPost({...newPost, title: e.target.value})}
-                  placeholder="Ex: Preciso de roupas de inverno"
-                  className="rounded-xl h-12"
+                  className="rounded-xl"
                 />
               </div>
-              
-              {/* Descrição */}
-              <div className="bg-gray-50 p-4 rounded-2xl">
-                <Label className="text-base font-bold mb-2 block">📝 Descrição</Label>
+              <div>
+                <Label>Descrição</Label>
                 <Textarea
                   data-testid="post-description-input"
                   value={newPost.description}
                   onChange={(e) => setNewPost({...newPost, description: e.target.value})}
                   rows={4}
-                  placeholder="Descreva em detalhes o que você precisa ou pode oferecer..."
                   className="rounded-xl"
                 />
               </div>
-
-              {/* Mídia e Localização */}
-              <div className="bg-gray-50 p-4 rounded-2xl space-y-3">
-                <Label className="text-base font-bold block">🔧 Opções Adicionais</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    type="button"
-                    data-testid="add-image-button"
-                    onClick={() => fileInputRef.current?.click()}
-                    variant="outline"
-                    className="h-12 rounded-xl border-2"
-                  >
-                    <ImageIcon size={18} className="mr-2" />
-                    Adicionar Fotos
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <Button
-                    type="button"
-                    data-testid="add-location-button"
-                    onClick={getLocation}
-                    variant="outline"
-                    className="h-12 rounded-xl border-2"
-                  >
-                    <MapPin size={18} className="mr-2" />
-                    Localização
-                  </Button>
-                </div>
-
-                {newPost.images && newPost.images.length > 0 && (
-                  <div className="flex gap-2 flex-wrap mt-3">
-                    {newPost.images.map((img, idx) => (
-                      <div key={idx} className="relative w-24 h-24 rounded-xl overflow-hidden border-2 group">
-                        <img src={img} alt="" className="w-full h-full object-cover" />
-                        <button
-                          onClick={() => removeImage(idx)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {newPost.location && (
-                  <div className="p-3 bg-green-100 rounded-xl flex items-center gap-2 text-sm text-green-700 font-medium">
-                    <MapPin size={16} />
-                    <span>✓ Localização adicionada</span>
-                  </div>
-                )}
+              
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  data-testid="add-image-button"
+                  onClick={() => fileInputRef.current?.click()}
+                  variant="outline"
+                  className="flex-1 rounded-xl"
+                >
+                  <ImageIcon size={18} className="mr-2" />
+                  Adicionar Foto
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  data-testid="add-location-button"
+                  onClick={getLocation}
+                  variant="outline"
+                  className="flex-1 rounded-xl"
+                >
+                  <MapPin size={18} className="mr-2" />
+                  Localização
+                </Button>
               </div>
+
+              {newPost.images && newPost.images.length > 0 && (
+                <div className="flex gap-2 flex-wrap">
+                  {newPost.images.map((img, idx) => (
+                    <div key={idx} className="relative w-24 h-24 rounded-lg overflow-hidden border group">
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => removeImage(idx)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {newPost.location && (
+                <div className="p-3 bg-green-50 rounded-xl flex items-center gap-2 text-sm text-green-700">
+                  <MapPin size={16} />
+                  <span>Localização adicionada</span>
+                </div>
+              )}
 
               <Button 
                 data-testid="submit-post-button"
                 onClick={createPost} 
-                className="w-full rounded-full py-6 text-lg font-bold bg-primary hover:bg-primary-hover"
+                className="w-full rounded-full py-6 bg-primary hover:bg-primary-hover"
               >
-                📢 Publicar Agora
+                Publicar
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Modal de Recursos */}
-        <Dialog open={showResourcesModal} onOpenChange={setShowResourcesModal}>
-          <DialogContent className="rounded-3xl max-w-2xl max-h-[85vh]">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-heading flex items-center gap-2">
-                {selectedResourceCategory && RESOURCES_INFO[selectedResourceCategory]?.icon}
-                {selectedResourceCategory && RESOURCES_INFO[selectedResourceCategory]?.title}
-              </DialogTitle>
-              <DialogDescription>
-                Organizações e serviços que podem ajudar
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 overflow-y-auto max-h-[calc(85vh-140px)]">
-              {selectedResourceCategory && RESOURCES_INFO[selectedResourceCategory]?.items.map((item, idx) => (
-                <div 
-                  key={idx} 
-                  className={`p-4 rounded-2xl border-2 ${item.urgent ? 'bg-red-50 border-red-300' : 'bg-white border-gray-200'}`}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-bold text-lg text-textPrimary">{item.name}</h3>
-                    {item.urgent && (
-                      <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
-                        URGENTE
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-textSecondary mb-2">{item.desc}</p>
-                  {item.link && (
-                    <a 
-                      href={item.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-primary font-medium hover:underline"
-                    >
-                      <ExternalLink size={16} />
-                      Acessar site
-                    </a>
-                  )}
-                </div>
-              ))}
-              <div className="p-4 bg-blue-50 rounded-2xl border-2 border-blue-200">
-                <p className="text-sm text-textSecondary">
-                  <strong>💡 Dica:</strong> Visite{' '}
-                  <a href="https://refugies.info" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                    Refugies.info
-                  </a>{' '}
-                  para mais recursos e informações atualizadas.
-                </p>
-              </div>
             </div>
           </DialogContent>
         </Dialog>
@@ -568,8 +399,18 @@ export default function HomePage() {
               <div 
                 key={post.id} 
                 data-testid="post-card"
-                className="bg-white rounded-3xl p-6 shadow-card card-hover"
+                className={`rounded-3xl p-6 shadow-card card-hover ${
+                  post.is_auto_response 
+                    ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-primary' 
+                    : 'bg-white'
+                }`}
               >
+                {post.is_auto_response && (
+                  <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-primary/10 rounded-full w-fit">
+                    <span className="text-lg">🤖</span>
+                    <span className="text-sm font-bold text-primary">Resposta Automática Watizat</span>
+                  </div>
+                )}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
@@ -617,18 +458,8 @@ export default function HomePage() {
                     )}
                   </div>
                   <div className="flex gap-2">
-                    {post.type === 'need' && (
-                      <Button
-                        onClick={() => openResourcesModal(post.category)}
-                        size="sm"
-                        variant="outline"
-                        className="rounded-full border-primary text-primary hover:bg-primary hover:text-white"
-                      >
-                        <Info size={16} className="mr-1" />
-                        Ver Recursos
-                      </Button>
-                    )}
                     <Button
+                      data-testid="toggle-comments-button"
                       onClick={() => toggleComments(post.id)}
                       size="sm"
                       variant="outline"
@@ -639,6 +470,7 @@ export default function HomePage() {
                     </Button>
                     {post.user_id !== user.id && (
                       <Button
+                        data-testid="chat-with-user-button"
                         onClick={() => navigate(`/direct-chat/${post.user_id}`)}
                         size="sm"
                         className="rounded-full bg-primary hover:bg-primary-hover text-white"
@@ -686,7 +518,7 @@ export default function HomePage() {
                         onClick={() => addComment(post.id)}
                         disabled={!newComment.trim()}
                         size="sm"
-                        className="rounded-full bg-primary hover:bg-primary-hover text-white"
+                        className="rounded-full bg-primary hover:bg-primary-hover"
                         data-testid="submit-comment-button"
                       >
                         <Send size={16} />
