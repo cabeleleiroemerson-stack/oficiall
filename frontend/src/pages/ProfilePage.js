@@ -62,9 +62,55 @@ export default function ProfilePage() {
               <User size={48} className="text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-heading font-bold text-textPrimary" data-testid="user-name">
-                {user?.name}
-              </h2>
+              <div className="flex items-center gap-2 justify-center">
+                <h2 className="text-2xl font-heading font-bold text-textPrimary" data-testid="user-name">
+                  {user?.use_display_name && user?.display_name ? user.display_name : user?.name}
+                </h2>
+                <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                  <DialogTrigger asChild>
+                    <button className="p-2 hover:bg-gray-100 rounded-full transition-all">
+                      <Edit size={18} className="text-primary" />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="rounded-3xl">
+                    <DialogHeader>
+                      <DialogTitle>Nome Fictício (Privacidade)</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Nome Fictício</Label>
+                        <Input
+                          value={displayName}
+                          onChange={(e) => setDisplayName(e.target.value)}
+                          placeholder="Ex: Maria S., João A."
+                          className="rounded-xl mt-2"
+                        />
+                        <p className="text-xs text-textMuted mt-2">
+                          Este nome aparecerá nos posts em vez do seu nome real
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={useDisplayName}
+                          onChange={(e) => setUseDisplayName(e.target.checked)}
+                          className="w-5 h-5 rounded border-gray-300"
+                        />
+                        <Label>Usar nome fictício nos posts</Label>
+                      </div>
+                      <Button
+                        onClick={saveDisplayName}
+                        className="w-full rounded-full py-6 bg-primary hover:bg-primary-hover"
+                      >
+                        Salvar
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              {user?.use_display_name && user?.display_name && (
+                <p className="text-xs text-textMuted">Nome fictício ativo</p>
+              )}
               <p className="text-textMuted capitalize" data-testid="user-role">
                 {user?.role === 'migrant' ? t('migrant') : user?.role === 'helper' ? t('helper') : user?.role}
               </p>
