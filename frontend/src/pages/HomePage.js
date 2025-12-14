@@ -598,7 +598,7 @@ export default function HomePage() {
               <div 
                 key={post.id} 
                 data-testid="post-card"
-                className="bg-white rounded-3xl p-6 shadow-card card-hover"
+                className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-card card-hover overflow-hidden"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
