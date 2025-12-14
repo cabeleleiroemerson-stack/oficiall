@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
 import BottomNav from '../components/BottomNav';
-import { Plus, MapPin, User, Clock, MessageCircle } from 'lucide-react';
+import { Plus, MapPin, User, Clock, MessageCircle, Image as ImageIcon, MessageSquare, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +30,7 @@ export default function HomePage() {
   const [showComments, setShowComments] = useState({});
   const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState('');
+  const [commentingOn, setCommentingOn] = useState(null);
 
   const categories = [
     { value: 'food', label: t('food'), color: 'bg-green-100 text-green-700 border-green-200' },
@@ -80,11 +81,84 @@ export default function HomePage() {
       if (response.ok) {
         toast.success('Post criado!');
         setShowCreatePost(false);
-        setNewPost({ type: user?.role === 'migrant' ? 'need' : 'offer', category: 'food', title: '', description: '' });
+        setNewPost({ type: user?.role === 'migrant' ? 'need' : 'offer', category: 'food', title: '', description: '', images: [], location: null });
         fetchPosts();
       }
     } catch (error) {
       toast.error('Erro ao criar post');
+    }
+  };
+
+  const handleImageUpload = () => {
+    const imageUrl = prompt('Cole a URL da imagem:');
+    if (imageUrl) {
+      setNewPost({...newPost, images: [...(newPost.images || []), imageUrl]});
+      toast.success('Imagem adicionada!');
+    }
+  };
+
+  const getLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setNewPost({
+            ...newPost,
+            location: {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              address: 'Localização atual'
+            }
+          });
+          toast.success('Localização adicionada!');
+        },
+        () => toast.error('Erro ao obter localização')
+      );
+    }
+  };
+
+  const fetchComments = async (postId) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/posts/${postId}/comments`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setComments(prev => ({...prev, [postId]: data}));
+      }
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
+
+  const toggleComments = (postId) => {
+    const isShowing = showComments[postId];
+    setShowComments(prev => ({...prev, [postId]: !isShowing}));
+    if (!isShowing && !comments[postId]) {
+      fetchComments(postId);
+    }
+  };
+
+  const addComment = async (postId) => {
+    if (!newComment.trim()) return;
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ comment: newComment })
+      });
+
+      if (response.ok) {
+        setNewComment('');
+        setCommentingOn(null);
+        fetchComments(postId);
+        toast.success('Comentário adicionado!');
+      }
+    } catch (error) {
+      toast.error('Erro ao adicionar comentário');
     }
   };
 
@@ -111,11 +185,11 @@ export default function HomePage() {
               {user?.role === 'migrant' ? 'Preciso de Ajuda' : 'Oferecer Ajuda'}
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-3xl" data-testid="create-post-dialog">
+          <DialogContent className="rounded-3xl max-w-lg" data-testid="create-post-dialog">
             <DialogHeader>
               <DialogTitle className="text-2xl font-heading">Criar Post</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
               <div>
                 <Label>Categoria</Label>
                 <Select value={newPost.category} onValueChange={(v) => setNewPost({...newPost, category: v})}>
@@ -148,6 +222,47 @@ export default function HomePage() {
                   className="rounded-xl"
                 />
               </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  data-testid="add-image-button"
+                  onClick={handleImageUpload}
+                  variant="outline"
+                  className="flex-1 rounded-xl"
+                >
+                  <ImageIcon size={18} className="mr-2" />
+                  Adicionar Foto
+                </Button>
+                <Button
+                  type="button"
+                  data-testid="add-location-button"
+                  onClick={getLocation}
+                  variant="outline"
+                  className="flex-1 rounded-xl"
+                >
+                  <MapPin size={18} className="mr-2" />
+                  Localização
+                </Button>
+              </div>
+
+              {newPost.images && newPost.images.length > 0 && (
+                <div className="flex gap-2 flex-wrap">
+                  {newPost.images.map((img, idx) => (
+                    <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border">
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {newPost.location && (
+                <div className="p-3 bg-green-50 rounded-xl flex items-center gap-2 text-sm text-green-700">
+                  <MapPin size={16} />
+                  <span>Localização adicionada</span>
+                </div>
+              )}
+
               <Button 
                 data-testid="submit-post-button"
                 onClick={createPost} 
@@ -189,7 +304,23 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-lg font-bold text-textPrimary mb-2">{post.title}</h3>
                 <p className="text-textSecondary mb-3 leading-relaxed">{post.description}</p>
-                <div className="flex items-center justify-between">
+
+                {post.images && post.images.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    {post.images.map((img, idx) => (
+                      <img key={idx} src={img} alt="" className="w-full h-48 object-cover rounded-2xl" />
+                    ))}
+                  </div>
+                )}
+
+                {post.location && (
+                  <div className="flex items-center gap-2 text-sm text-textMuted mb-3 p-2 bg-blue-50 rounded-lg">
+                    <MapPin size={16} className="text-primary" />
+                    <span>{post.location.address || 'Localização disponível'}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between border-t pt-3 mt-3">
                   <div className="flex items-center gap-4 text-sm text-textMuted">
                     <span className="flex items-center gap-1">
                       <Clock size={16} />
@@ -202,18 +333,75 @@ export default function HomePage() {
                       <span className="text-primary font-medium">Oferece ajuda</span>
                     )}
                   </div>
-                  {post.user_id !== user.id && (
+                  <div className="flex gap-2">
                     <Button
-                      data-testid="chat-with-user-button"
-                      onClick={() => navigate(`/direct-chat/${post.user_id}`)}
+                      data-testid="toggle-comments-button"
+                      onClick={() => toggleComments(post.id)}
                       size="sm"
-                      className="rounded-full bg-primary hover:bg-primary-hover"
+                      variant="outline"
+                      className="rounded-full"
                     >
-                      <MessageCircle size={16} className="mr-1" />
-                      Conversar
+                      <MessageSquare size={16} className="mr-1" />
+                      {showComments[post.id] ? 'Ocultar' : 'Comentários'}
                     </Button>
-                  )}
+                    {post.user_id !== user.id && (
+                      <Button
+                        data-testid="chat-with-user-button"
+                        onClick={() => navigate(`/direct-chat/${post.user_id}`)}
+                        size="sm"
+                        className="rounded-full bg-primary hover:bg-primary-hover"
+                      >
+                        <MessageCircle size={16} className="mr-1" />
+                        Conversar
+                      </Button>
+                    )}
+                  </div>
                 </div>
+
+                {showComments[post.id] && (
+                  <div className="mt-4 pt-4 border-t space-y-3">
+                    {comments[post.id] && comments[post.id].length > 0 ? (
+                      comments[post.id].map((comment) => (
+                        <div key={comment.id} className="flex gap-3 p-3 bg-gray-50 rounded-2xl">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
+                            <User size={16} className="text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-textPrimary">{comment.user?.name}</p>
+                            <p className="text-sm text-textSecondary">{comment.comment}</p>
+                            <p className="text-xs text-textMuted mt-1">
+                              {new Date(comment.created_at).toLocaleString('pt-BR')}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-textMuted text-center py-2">Nenhum comentário ainda</p>
+                    )}
+
+                    <div className="flex gap-2 mt-3">
+                      <Input
+                        placeholder="Escreva um comentário..."
+                        value={commentingOn === post.id ? newComment : ''}
+                        onChange={(e) => {
+                          setCommentingOn(post.id);
+                          setNewComment(e.target.value);
+                        }}
+                        className="rounded-full"
+                        data-testid="comment-input"
+                      />
+                      <Button
+                        onClick={() => addComment(post.id)}
+                        disabled={!newComment.trim()}
+                        size="sm"
+                        className="rounded-full bg-primary hover:bg-primary-hover"
+                        data-testid="submit-comment-button"
+                      >
+                        <Send size={16} />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
