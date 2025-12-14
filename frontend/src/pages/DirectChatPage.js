@@ -116,14 +116,23 @@ export default function DirectChatPage() {
     }
   };
 
-  const sendMedia = (type) => {
-    const mediaUrl = prompt(`Cole a URL ${type === 'image' ? 'da imagem' : 'do vídeo'}:`);
-    if (mediaUrl) {
-      sendMessage({
-        media: [mediaUrl],
-        media_type: type
-      });
-      toast.success(`${type === 'image' ? 'Imagem' : 'Vídeo'} enviado!`);
+  const handleFileUpload = (e, type) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 10000000) {
+        toast.error('Arquivo muito grande! Máximo 10MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        sendMessage({
+          media: [reader.result],
+          media_type: type
+        });
+        toast.success(`${type === 'image' ? 'Foto' : 'Vídeo'} enviado!`);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
