@@ -160,6 +160,12 @@ async def register(user_data: UserRegister):
     user_dict['password'] = hashed_pw.decode()
     user_dict['created_at'] = user_dict['created_at'].isoformat()
     
+    if user_data.role == 'volunteer':
+        user_dict['professional_area'] = user_data.professional_area
+        user_dict['professional_specialties'] = user_data.professional_specialties or []
+        user_dict['availability'] = user_data.availability
+        user_dict['experience'] = user_data.experience
+    
     await db.users.insert_one(user_dict)
     
     token = create_token(user.id, user.email)
