@@ -417,12 +417,110 @@ async def admin_stats(current_user: User = Depends(get_current_user)):
     total_users = await db.users.count_documents({})
     total_posts = await db.posts.count_documents({})
     total_matches = await db.matches.count_documents({})
+    total_volunteers = await db.users.count_documents({'role': 'volunteer'})
+    total_migrants = await db.users.count_documents({'role': 'migrant'})
+    total_messages = await db.messages.count_documents({})
+    
+    # Posts por categoria
+    posts_by_category = {}
+    categories = ['food', 'legal', 'health', 'housing', 'work', 'education', 'social', 'clothes', 'furniture', 'transport']
+    for cat in categories:
+        count = await db.posts.count_documents({'category': cat})
+        posts_by_category[cat] = count
+    
+    # Posts por tipo
+    needs_count = await db.posts.count_documents({'type': 'need'})
+    offers_count = await db.posts.count_documents({'type': 'offer'})
     
     return {
         'total_users': total_users,
         'total_posts': total_posts,
-        'total_matches': total_matches
+        'total_matches': total_matches,
+        'total_volunteers': total_volunteers,
+        'total_migrants': total_migrants,
+        'total_messages': total_messages,
+        'posts_by_category': posts_by_category,
+        'needs_count': needs_count,
+        'offers_count': offers_count
     }
+
+@api_router.get("/admin/users")
+async def admin_get_users(current_user: User = Depends(get_current_user)):
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    users = await db.users.find({}, {'_id': 0, 'password': 0}).sort('created_at', -1).to_list(1000)
+    
+    for user in users:
+        if isinstance(user.get('created_at'), str):
+            user['created_at'] = datetime.fromisoformat(user['created_at'])
+    
+    return users
+
+@api_router.get("/admin/posts")
+async def admin_get_posts(current_user: User = Depends(get_current_user)):
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    posts = await db.posts.find({}, {'_id': 0}).sort('created_at', -1).to_list(1000)
+    
+    for post in posts:
+        if isinstance(post.get('created_at'), str):
+            post['created_at'] = datetime.fromisoformat(post['created_at'])
+        # Get user info
+        user = await db.users.find_one({'id': post['user_id']}, {'_id': 0, 'password': 0, 'email': 0})
+        if user:
+            post['user'] = {'name': user['name'], 'role': user['role']}
+    
+    return posts
+
+@api_router.delete("/admin/users/{user_id}")
+async def admin_delete_user(user_id: str, current_user: User = Depends(get_current_user)):
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    # Don't allow deleting yourself
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+    
+    result = await db.users.delete_one({'id': user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Also delete user's posts and messages
+    await db.posts.delete_many({'user_id': user_id})
+    await db.messages.delete_many({'$or': [{'from_user_id': user_id}, {'to_user_id': user_id}]})
+    
+    return {'message': 'User deleted successfully'}
+
+@api_router.delete("/admin/posts/{post_id}")
+async def admin_delete_post(post_id: str, current_user: User = Depends(get_current_user)):
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    result = await db.posts.delete_one({'id': post_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    # Also delete comments
+    await db.comments.delete_many({'post_id': post_id})
+    
+    return {'message': 'Post deleted successfully'}
+
+@api_router.put("/admin/users/{user_id}/role")
+async def admin_update_user_role(user_id: str, role_data: dict, current_user: User = Depends(get_current_user)):
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    new_role = role_data.get('role')
+    if new_role not in ['migrant', 'volunteer', 'helper', 'admin']:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    
+    result = await db.users.update_one({'id': user_id}, {'$set': {'role': new_role}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {'message': 'Role updated successfully'}
 
 class DirectMessage(BaseModel):
     model_config = ConfigDict(extra="ignore")
