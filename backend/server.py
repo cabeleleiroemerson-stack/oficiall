@@ -14,6 +14,7 @@ import bcrypt
 import jwt
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 from pdf_processor import WatizatPDFProcessor
+from auto_responses import get_auto_response, format_auto_response_post
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
