@@ -12,6 +12,7 @@ import ServicesPage from './pages/ServicesPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
 import DirectChatPage from './pages/DirectChatPage';
+import VolunteersPage from './pages/VolunteersPage';
 
 export const AuthContext = React.createContext();
 
