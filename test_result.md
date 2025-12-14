@@ -107,39 +107,48 @@ user_problem_statement: "Corrigir erro na parte de cadastro de voluntário coloc
 backend:
   - task: "Adicionar campo help_categories no registro de voluntário"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
         - agent: "main"
         - comment: "Adicionado campo help_categories no UserRegister e salvamento no MongoDB"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ TESTED: Volunteer registration with help_categories=['food', 'health'] works correctly. Field is properly saved and accessible in user data."
 
   - task: "Filtrar posts baseado nas categorias do voluntário"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
         - agent: "main"
         - comment: "Endpoint /api/posts agora filtra posts para voluntários baseado em help_categories"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ TESTED: Post filtering works correctly. Volunteer with help_categories=['food', 'health'] sees food posts but not legal posts. Posts include can_help=true field. Education volunteer sees no need posts when no matching categories."
 
   - task: "Endpoint can-chat para verificar permissão de chat"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
         - agent: "main"
         - comment: "Criado endpoint /api/can-chat/{user_id} que verifica se voluntário pode conversar"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ TESTED: Can-chat endpoint works correctly. Returns can_chat=true for volunteers with matching categories (food volunteer can chat with migrant who has food posts). Returns can_chat=false with reason='no_matching_categories' for volunteers without matching categories (education volunteer cannot chat with migrant who only has food/legal posts)."
 
 frontend:
   - task: "Adicionar seleção de categorias de ajuda no cadastro de voluntário"
