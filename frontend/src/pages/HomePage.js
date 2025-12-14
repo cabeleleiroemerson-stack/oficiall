@@ -182,16 +182,28 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-lg font-bold text-textPrimary mb-2">{post.title}</h3>
                 <p className="text-textSecondary mb-3 leading-relaxed">{post.description}</p>
-                <div className="flex items-center gap-4 text-sm text-textMuted">
-                  <span className="flex items-center gap-1">
-                    <Clock size={16} />
-                    {new Date(post.created_at).toLocaleDateString('pt-BR')}
-                  </span>
-                  {post.type === 'need' && (
-                    <span className="text-green-600 font-medium">Precisa de ajuda</span>
-                  )}
-                  {post.type === 'offer' && (
-                    <span className="text-primary font-medium">Oferece ajuda</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 text-sm text-textMuted">
+                    <span className="flex items-center gap-1">
+                      <Clock size={16} />
+                      {new Date(post.created_at).toLocaleDateString('pt-BR')}
+                    </span>
+                    {post.type === 'need' && (
+                      <span className="text-green-600 font-medium">Precisa de ajuda</span>
+                    )}
+                    {post.type === 'offer' && (
+                      <span className="text-primary font-medium">Oferece ajuda</span>
+                    )}
+                  </div>
+                  {post.user_id !== user.id && (
+                    <Button
+                      data-testid="chat-with-user-button"
+                      onClick={() => window.location.href = `/direct-chat/${post.user_id}`}
+                      size="sm"
+                      className="rounded-full bg-primary hover:bg-primary-hover"
+                    >
+                      Conversar
+                    </Button>
                   )}
                 </div>
               </div>
