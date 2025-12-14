@@ -325,52 +325,52 @@ export default function VolunteerRegisterPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <Label className="text-base font-bold mb-2">
+                  <Label className="text-sm sm:text-base font-bold mb-2">
                     Especialidades (separadas por vírgula)
                   </Label>
                   <Input
                     value={specialties}
                     onChange={(e) => setSpecialties(e.target.value)}
-                    placeholder="Ex: Direito de Família, Asilo, Imigração"
-                    className="rounded-xl h-12"
+                    placeholder="Ex: Direito de Família, Asilo"
+                    className="rounded-xl h-11 sm:h-12 text-sm sm:text-base"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-base font-bold mb-2">
+                  <Label className="text-sm sm:text-base font-bold mb-2">
                     Organização/Empresa Atual
                   </Label>
                   <Input
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
                     placeholder="Nome da organização"
-                    className="rounded-xl h-12"
+                    className="rounded-xl h-11 sm:h-12 text-sm sm:text-base"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-base font-bold mb-2">
+                  <Label className="text-sm sm:text-base font-bold mb-2">
                     Número de Registro Profissional
                   </Label>
                   <Input
                     value={professionalId}
                     onChange={(e) => setProfessionalId(e.target.value)}
                     placeholder="Ex: OAB, CRM, COREN"
-                    className="rounded-xl h-12"
+                    className="rounded-xl h-11 sm:h-12 text-sm sm:text-base"
                   />
                   <p className="text-xs text-textMuted mt-1">Opcional, mas aumenta credibilidade</p>
                 </div>
 
                 <div>
-                  <Label className="text-base font-bold mb-2">
+                  <Label className="text-sm sm:text-base font-bold mb-2">
                     Anos de Experiência
                   </Label>
                   <select
                     value={yearsExperience}
                     onChange={(e) => setYearsExperience(e.target.value)}
-                    className="w-full h-12 px-3 border rounded-xl bg-white"
+                    className="w-full h-11 sm:h-12 px-3 border rounded-xl bg-white text-sm sm:text-base"
                   >
                     <option value="">Selecione</option>
                     <option value="0-2">0-2 anos</option>
