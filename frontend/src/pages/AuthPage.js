@@ -50,7 +50,19 @@ export default function AuthPage() {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const body = isLogin 
         ? { email, password }
-        : { email, password, name, role, languages: ['pt', 'fr'] };
+        : { 
+            email, 
+            password, 
+            name, 
+            role, 
+            languages: ['pt', 'fr'],
+            ...(role === 'volunteer' && {
+              professional_area: professionalArea,
+              professional_specialties: specialties.split(',').map(s => s.trim()).filter(Boolean),
+              availability,
+              experience
+            })
+          };
 
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, {
         method: 'POST',
