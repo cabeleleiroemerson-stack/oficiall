@@ -207,9 +207,38 @@ async def create_post(post_data: PostCreate, current_user: User = Depends(get_cu
     
     post_dict = post.model_dump()
     post_dict['created_at'] = post_dict['created_at'].isoformat()
+    post_dict['images'] = post_data.images or []
     
     await db.posts.insert_one(post_dict)
     return post
+
+@api_router.post("/posts/{post_id}/comments")
+async def add_comment(post_id: str, comment_data: PostCommentCreate, current_user: User = Depends(get_current_user)):
+    comment = PostComment(
+        post_id=post_id,
+        user_id=current_user.id,
+        comment=comment_data.comment
+    )
+    
+    comment_dict = comment.model_dump()
+    comment_dict['created_at'] = comment_dict['created_at'].isoformat()
+    
+    await db.comments.insert_one(comment_dict)
+    return comment
+
+@api_router.get("/posts/{post_id}/comments")
+async def get_comments(post_id: str):
+    comments = await db.comments.find({'post_id': post_id}, {'_id': 0}).sort('created_at', 1).to_list(1000)
+    
+    for comment in comments:
+        if isinstance(comment['created_at'], str):
+            comment['created_at'] = datetime.fromisoformat(comment['created_at'])
+        
+        user = await db.users.find_one({'id': comment['user_id']}, {'_id': 0, 'password': 0, 'email': 0})
+        if user:
+            comment['user'] = {'name': user['name'], 'role': user['role']}
+    
+    return comments
 
 @api_router.get("/posts")
 async def get_posts(type: Optional[str] = None, category: Optional[str] = None):
