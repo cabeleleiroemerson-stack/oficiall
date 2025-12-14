@@ -417,92 +417,115 @@ export default function HomePage() {
                   </div>
                 </div>
 
-              {/* Título */}
-              <div className="bg-gray-50 p-4 rounded-2xl">
-                <Label className="text-base font-bold mb-2 block">✏️ Título</Label>
-                <Input
-                  data-testid="post-title-input"
-                  value={newPost.title}
-                  onChange={(e) => setNewPost({...newPost, title: e.target.value})}
-                  placeholder="Ex: Preciso de roupas de inverno"
-                  className="rounded-xl h-12"
-                />
-              </div>
-              
-              {/* Descrição */}
-              <div className="bg-gray-50 p-4 rounded-2xl">
-                <Label className="text-base font-bold mb-2 block">📝 Descrição</Label>
-                <Textarea
-                  data-testid="post-description-input"
-                  value={newPost.description}
-                  onChange={(e) => setNewPost({...newPost, description: e.target.value})}
-                  rows={4}
-                  placeholder="Descreva em detalhes o que você precisa ou pode oferecer..."
-                  className="rounded-xl"
-                />
-              </div>
-
-              {/* Mídia e Localização */}
-              <div className="bg-gray-50 p-4 rounded-2xl space-y-3">
-                <Label className="text-base font-bold block">🔧 Opções Adicionais</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    type="button"
-                    data-testid="add-image-button"
-                    onClick={() => fileInputRef.current?.click()}
-                    variant="outline"
-                    className="h-12 rounded-xl border-2"
-                  >
-                    <ImageIcon size={18} className="mr-2" />
-                    Adicionar Fotos
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
+                {/* Título */}
+                <div className="bg-white border-2 border-gray-200 p-5 rounded-2xl">
+                  <Label className="text-base font-bold mb-3 block flex items-center gap-2">
+                    <span className="text-2xl">✏️</span>
+                    <span>Título do Pedido</span>
+                  </Label>
+                  <Input
+                    data-testid="post-title-input"
+                    value={newPost.title}
+                    onChange={(e) => setNewPost({...newPost, title: e.target.value})}
+                    placeholder="Ex: Preciso de roupas de inverno"
+                    className="rounded-xl h-12 text-base"
                   />
-                  <Button
-                    type="button"
-                    data-testid="add-location-button"
-                    onClick={getLocation}
-                    variant="outline"
-                    className="h-12 rounded-xl border-2"
-                  >
-                    <MapPin size={18} className="mr-2" />
-                    Localização
-                  </Button>
+                  <p className="text-xs text-textMuted mt-2">Seja claro e específico</p>
+                </div>
+                
+                {/* Descrição */}
+                <div className="bg-white border-2 border-gray-200 p-5 rounded-2xl">
+                  <Label className="text-base font-bold mb-3 block flex items-center gap-2">
+                    <span className="text-2xl">📝</span>
+                    <span>Detalhes</span>
+                  </Label>
+                  <Textarea
+                    data-testid="post-description-input"
+                    value={newPost.description}
+                    onChange={(e) => setNewPost({...newPost, description: e.target.value})}
+                    rows={5}
+                    placeholder="Descreva em detalhes: tamanhos, quantidades, quando precisa, etc..."
+                    className="rounded-xl text-base"
+                  />
+                  <p className="text-xs text-textMuted mt-2">Quanto mais detalhes, melhor!</p>
                 </div>
 
-                {newPost.images && newPost.images.length > 0 && (
-                  <div className="flex gap-2 flex-wrap mt-3">
-                    {newPost.images.map((img, idx) => (
-                      <div key={idx} className="relative w-24 h-24 rounded-xl overflow-hidden border-2 group">
-                        <img src={img} alt="" className="w-full h-full object-cover" />
-                        <button
-                          onClick={() => removeImage(idx)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X size={14} />
-                        </button>
+                {/* Mídia e Localização */}
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 p-5 rounded-2xl space-y-4">
+                  <Label className="text-base font-bold block flex items-center gap-2">
+                    <span className="text-2xl">📎</span>
+                    <span>Adicionar Mais Informações (Opcional)</span>
+                  </Label>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Button
+                      type="button"
+                      data-testid="add-image-button"
+                      onClick={() => fileInputRef.current?.click()}
+                      variant="outline"
+                      className="h-14 rounded-xl border-2 bg-white hover:bg-blue-50 hover:border-primary"
+                    >
+                      <ImageIcon size={20} className="mr-2" />
+                      <span className="font-bold">Adicionar Fotos</span>
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      data-testid="add-location-button"
+                      onClick={getLocation}
+                      variant="outline"
+                      className="h-14 rounded-xl border-2 bg-white hover:bg-blue-50 hover:border-primary"
+                    >
+                      <MapPin size={20} className="mr-2" />
+                      <span className="font-bold">Localização</span>
+                    </Button>
+                  </div>
+
+                  {newPost.images && newPost.images.length > 0 && (
+                    <div className="bg-white p-3 rounded-xl">
+                      <p className="text-sm font-bold text-textPrimary mb-3">Fotos adicionadas:</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {newPost.images.map((img, idx) => (
+                          <div key={idx} className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-gray-200 group">
+                            <img src={img} alt="" className="w-full h-full object-cover" />
+                            <button
+                              onClick={() => removeImage(idx)}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
+                    </div>
+                  )}
 
-                {newPost.location && (
-                  <div className="p-3 bg-green-100 rounded-xl flex items-center gap-2 text-sm text-green-700 font-medium">
-                    <MapPin size={16} />
-                    <span>✓ Localização adicionada</span>
-                  </div>
-                )}
+                  {newPost.location && (
+                    <div className="p-4 bg-green-100 rounded-xl flex items-center gap-3 border-2 border-green-300">
+                      <div className="bg-green-500 p-2 rounded-full">
+                        <MapPin size={20} className="text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-green-800">Localização adicionada</p>
+                        <p className="text-xs text-green-700">Sua localização será compartilhada</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
+            </div>
 
+            <div className="border-t pt-4 px-1">
               <Button 
                 data-testid="submit-post-button"
                 onClick={createPost} 
-                className="w-full rounded-full py-6 text-lg font-bold bg-primary hover:bg-primary-hover"
+                className="w-full rounded-full py-6 text-lg font-bold bg-primary hover:bg-primary-hover shadow-lg"
               >
                 📢 Publicar Agora
               </Button>
