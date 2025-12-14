@@ -73,6 +73,7 @@ export default function VolunteerRegisterPage() {
   // Etapa 4: Disponibilidade e Contato
   const [availability, setAvailability] = useState('');
   const [helpTypes, setHelpTypes] = useState([]);
+  const [helpCategories, setHelpCategories] = useState([]);
   const [linkedin, setLinkedin] = useState('');
 
   const nextStep = () => {
