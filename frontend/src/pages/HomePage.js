@@ -671,7 +671,7 @@ export default function HomePage() {
                       <MessageSquare size={14} className="sm:mr-1" />
                       <span className="ml-1">{showComments[post.id] ? 'Ocultar' : 'Comentários'}</span>
                     </Button>
-                    {post.user_id !== user.id && (
+                    {post.user_id !== user.id && post.can_help && (
                       <Button
                         onClick={() => navigate(`/direct-chat/${post.user_id}`)}
                         size="sm"
