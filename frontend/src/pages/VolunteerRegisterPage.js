@@ -116,6 +116,11 @@ export default function VolunteerRegisterPage() {
       return;
     }
 
+    if (helpCategories.length === 0) {
+      toast.error('Selecione pelo menos uma categoria de ajuda');
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/register`, {
@@ -137,6 +142,7 @@ export default function VolunteerRegisterPage() {
           organization,
           years_experience: yearsExperience,
           help_types: helpTypes,
+          help_categories: helpCategories,
           phone,
           linkedin
         })
