@@ -103,6 +103,20 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchAdvertisements = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/advertisements`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAdvertisements(data);
+      }
+    } catch (error) {
+      console.error('Error fetching advertisements:', error);
+    }
+  };
+
   const handleDelete = async () => {
     if (!itemToDelete) return;
 
