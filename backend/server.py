@@ -128,6 +128,30 @@ class PostComment(BaseModel):
     comment: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Advertisement(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    type: str  # 'motivation', 'donation', 'sponsor'
+    title: str
+    content: str
+    image_url: Optional[str] = None
+    link_url: Optional[str] = None
+    link_text: Optional[str] = None
+    is_active: bool = True
+    priority: int = 0  # Higher = more important
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class AdvertisementCreate(BaseModel):
+    type: str
+    title: str
+    content: str
+    image_url: Optional[str] = None
+    link_url: Optional[str] = None
+    link_text: Optional[str] = None
+    is_active: bool = True
+    priority: int = 0
+
+
 class PostCommentCreate(BaseModel):
     comment: str
 
