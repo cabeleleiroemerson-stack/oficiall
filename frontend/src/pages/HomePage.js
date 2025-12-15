@@ -415,6 +415,110 @@ export default function HomePage() {
       </div>
 
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-7xl overflow-x-hidden">
+        {/* Seção Mobile - Vagas e Mensagens (carrossel horizontal) */}
+        <div className="lg:hidden mb-4">
+          {/* Header Mobile */}
+          <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-2xl p-3 mb-3 shadow-lg">
+            <h3 className="font-bold text-sm">📢 Oportunidades & Inspiração</h3>
+            <p className="text-xs text-white/80">Deslize para ver vagas e mensagens</p>
+          </div>
+          
+          {/* Carrossel Horizontal */}
+          <div className="flex gap-3 overflow-x-auto pb-3 scroll-container" style={{ scrollSnapType: 'x mandatory' }}>
+            {advertisements.slice(0, 10).map((item, idx) => {
+              // Vaga de Emprego
+              if (item.type === 'job' || item.item_type === 'job') {
+                return (
+                  <div 
+                    key={item.id || idx} 
+                    className="flex-shrink-0 w-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-md overflow-hidden border-2 border-blue-200"
+                    style={{ scrollSnapAlign: 'start' }}
+                  >
+                    {item.image_url && (
+                      <img src={item.image_url} alt={item.title} className="w-full h-24 object-cover" />
+                    )}
+                    <div className="p-3">
+                      <span className="text-xs font-bold px-2 py-0.5 bg-blue-600 text-white rounded-full">💼 VAGA</span>
+                      <h3 className="font-bold text-xs text-textPrimary mt-2 line-clamp-2">{item.title}</h3>
+                      <p className="text-xs text-textSecondary mt-1">{item.content}</p>
+                      {item.link_url && (
+                        <a 
+                          href={item.link_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="block w-full text-center py-1.5 mt-2 bg-blue-600 text-white font-bold rounded-lg text-xs"
+                        >
+                          Ver Vaga →
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+              
+              // Doação
+              if (item.type === 'donation') {
+                return (
+                  <div 
+                    key={item.id || idx} 
+                    className="flex-shrink-0 w-64 bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl shadow-md overflow-hidden border-2 border-orange-200"
+                    style={{ scrollSnapAlign: 'start' }}
+                  >
+                    {item.image_url && (
+                      <img src={item.image_url} alt={item.title} className="w-full h-24 object-cover" />
+                    )}
+                    <div className="p-3">
+                      <span className="text-xs font-bold px-2 py-0.5 bg-orange-500 text-white rounded-full">❤️ AJUDE</span>
+                      <h3 className="font-bold text-xs text-textPrimary mt-2 line-clamp-2">{item.title}</h3>
+                      <p className="text-xs text-textSecondary mt-1 line-clamp-2">{item.content}</p>
+                      {item.link_url && (
+                        <a 
+                          href={item.link_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="block w-full text-center py-1.5 mt-2 bg-orange-500 text-white font-bold rounded-lg text-xs"
+                        >
+                          {item.link_text || 'Doar'} →
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+              
+              // Motivação
+              return (
+                <div 
+                  key={item.id || idx} 
+                  className="flex-shrink-0 w-64 bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100"
+                  style={{ scrollSnapAlign: 'start' }}
+                >
+                  {item.image_url && (
+                    <img src={item.image_url} alt={item.title} className="w-full h-24 object-cover" />
+                  )}
+                  <div className="p-3">
+                    <h3 className="font-bold text-xs text-textPrimary line-clamp-2">{item.title}</h3>
+                    <p className="text-xs text-textSecondary mt-1 line-clamp-3">{item.content}</p>
+                  </div>
+                </div>
+              );
+            })}
+            
+            {/* Link para mais */}
+            <a 
+              href="https://rozgarline.me/jobs/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex-shrink-0 w-48 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-4 flex flex-col items-center justify-center text-white"
+              style={{ scrollSnapAlign: 'start' }}
+            >
+              <span className="text-2xl mb-2">🔍</span>
+              <span className="font-bold text-sm text-center">Ver Todas as Vagas</span>
+              <span className="text-xs text-white/80 mt-1">RozgarLine</span>
+            </a>
+          </div>
+        </div>
+
         <div className="flex gap-4">
           {/* Sidebar Esquerda - Anúncios e Vagas (visível apenas em desktop) */}
           <div className="hidden lg:block w-80 flex-shrink-0 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto scroll-container pr-2">
