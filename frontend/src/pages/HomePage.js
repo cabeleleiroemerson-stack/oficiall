@@ -404,7 +404,77 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-2xl overflow-x-hidden">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-7xl overflow-x-hidden">
+        <div className="flex gap-4">
+          {/* Sidebar Esquerda - Anúncios (visível apenas em desktop) */}
+          <div className="hidden lg:block w-80 flex-shrink-0 space-y-4">
+            {/* Mensagens de Motivação */}
+            {advertisements.filter(ad => ad.type === 'motivation').slice(0, 3).map((ad, idx) => (
+              <div key={ad.id} className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
+                {ad.image_url && (
+                  <img 
+                    src={ad.image_url} 
+                    alt={ad.title} 
+                    className="w-full h-32 object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <h3 className="font-bold text-sm text-textPrimary mb-2">{ad.title}</h3>
+                  <p className="text-xs text-textSecondary leading-relaxed">{ad.content}</p>
+                </div>
+              </div>
+            ))}
+
+            {/* Anúncios de Doação */}
+            {advertisements.filter(ad => ad.type === 'donation').map((ad, idx) => (
+              <div key={ad.id} className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl shadow-md overflow-hidden border-2 border-orange-200">
+                {ad.image_url && (
+                  <img 
+                    src={ad.image_url} 
+                    alt={ad.title} 
+                    className="w-full h-40 object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold px-2 py-1 bg-orange-500 text-white rounded-full">PATROCINADO</span>
+                  </div>
+                  <h3 className="font-bold text-sm text-textPrimary mb-2">{ad.title}</h3>
+                  <p className="text-xs text-textSecondary leading-relaxed mb-3">{ad.content}</p>
+                  {ad.link_url && (
+                    <a 
+                      href={ad.link_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block w-full text-center py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-colors"
+                    >
+                      {ad.link_text || 'Saiba Mais'} →
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {/* Mais Mensagens de Motivação */}
+            {advertisements.filter(ad => ad.type === 'motivation').slice(3).map((ad, idx) => (
+              <div key={ad.id} className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-md overflow-hidden border border-blue-100">
+                {ad.image_url && (
+                  <img 
+                    src={ad.image_url} 
+                    alt={ad.title} 
+                    className="w-full h-32 object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <h3 className="font-bold text-sm text-textPrimary mb-2">{ad.title}</h3>
+                  <p className="text-xs text-textSecondary leading-relaxed">{ad.content}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Conteúdo Principal - Feed */}
+          <div className="flex-1 max-w-2xl mx-auto">
         <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
           <DialogTrigger asChild>
             <Button 
