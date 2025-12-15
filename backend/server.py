@@ -640,20 +640,33 @@ async def get_conversations(current_user: User = Depends(get_current_user)):
         if msg['to_user_id'] != current_user.id:
             user_ids.add(msg['to_user_id'])
     
+    # Batch fetch all users to avoid N+1 queries
+    user_ids_list = list(user_ids)
+    users_dict = {}
+    if user_ids_list:
+        users_cursor = db.users.find({'id': {'$in': user_ids_list}}, {'_id': 0, 'password': 0})
+        async for user in users_cursor:
+            users_dict[user['id']] = user
+    
+    # Get last messages for each conversation in batch
+    last_messages = {}
+    for uid in user_ids_list:
+        relevant_msgs = [m for m in messages if 
+            (m['from_user_id'] == uid and m['to_user_id'] == current_user.id) or
+            (m['from_user_id'] == current_user.id and m['to_user_id'] == uid)]
+        if relevant_msgs:
+            # Sort by created_at and get last one
+            sorted_msgs = sorted(relevant_msgs, key=lambda x: x.get('created_at', ''), reverse=True)
+            last_messages[uid] = sorted_msgs[0]
+    
     conversations = []
     for uid in user_ids:
-        user = await db.users.find_one({'id': uid}, {'_id': 0, 'password': 0})
+        user = users_dict.get(uid)
         if user:
-            last_msg = await db.messages.find_one({
-                '$or': [
-                    {'from_user_id': current_user.id, 'to_user_id': uid},
-                    {'from_user_id': uid, 'to_user_id': current_user.id}
-                ]
-            }, {'_id': 0}, sort=[('created_at', -1)])
-            
             if isinstance(user.get('created_at'), str):
                 user['created_at'] = datetime.fromisoformat(user['created_at'])
             
+            last_msg = last_messages.get(uid)
             conversations.append({
                 'user': user,
                 'last_message': last_msg['message'] if last_msg else '',
