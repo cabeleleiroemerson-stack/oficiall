@@ -30,6 +30,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [advertisements, setAdvertisements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,11 +39,24 @@ export default function AdminDashboard() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [deleteType, setDeleteType] = useState('');
+  const [showAdDialog, setShowAdDialog] = useState(false);
+  const [editingAd, setEditingAd] = useState(null);
+  const [newAd, setNewAd] = useState({
+    type: 'motivation',
+    title: '',
+    content: '',
+    image_url: '',
+    link_url: '',
+    link_text: '',
+    is_active: true,
+    priority: 5
+  });
 
   useEffect(() => {
     fetchStats();
     fetchUsers();
     fetchPosts();
+    fetchAdvertisements();
   }, []);
 
   const fetchStats = async () => {
