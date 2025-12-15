@@ -250,24 +250,6 @@ export default function MapPage() {
       </div>
 
       <div className="container mx-auto px-2 sm:px-4 py-4 max-w-6xl">
-        {/* Error State */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 flex items-center gap-3">
-            <AlertCircle className="text-red-500" size={24} />
-            <div>
-              <p className="text-red-800 font-medium">{error}</p>
-              <Button
-                onClick={fetchLocations}
-                variant="outline"
-                size="sm"
-                className="mt-2"
-              >
-                Tentar novamente
-              </Button>
-            </div>
-          </div>
-        )}
-
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-12 min-h-[300px]">
