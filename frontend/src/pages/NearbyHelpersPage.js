@@ -375,42 +375,41 @@ export default function NearbyHelpersPage() {
         </div>
       </div>
 
-      <div className="container mx-auto max-w-4xl px-4 py-4">
-        <div className="grid lg:grid-cols-2 gap-4">
-          {/* Map */}
-          <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
-            {loadingLocation ? (
-              <div className="h-[400px] flex items-center justify-center bg-gray-100">
-                <div className="text-center">
-                  <Loader2 size={32} className="animate-spin text-primary mx-auto mb-2" />
-                  <p className="text-gray-600">Obtendo sua localização...</p>
-                </div>
+      <div className="container mx-auto max-w-4xl px-2 sm:px-4 py-4">
+        {/* Map - Sempre visível no topo */}
+        <div className="bg-white rounded-2xl shadow-sm border overflow-hidden mb-4">
+          {loadingLocation ? (
+            <div className="h-[300px] sm:h-[350px] flex items-center justify-center bg-gray-100">
+              <div className="text-center">
+                <Loader2 size={32} className="animate-spin text-primary mx-auto mb-2" />
+                <p className="text-gray-600">Obtendo sua localização...</p>
               </div>
-            ) : (
-              <div ref={mapRef} className="h-[400px] w-full" />
-            )}
-            
-            {/* Map Legend */}
-            <div className="p-3 bg-gray-50 border-t">
-              <div className="flex flex-wrap gap-3 text-xs">
-                <div className="flex items-center gap-1">
-                  <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow"></div>
-                  <span>Você</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white shadow"></div>
-                  <span>Voluntários</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-4 h-4 rounded bg-green-500 border-2 border-white shadow"></div>
-                  <span>Locais de Ajuda</span>
-                </div>
+            </div>
+          ) : (
+            <div ref={mapRef} className="h-[300px] sm:h-[350px] w-full" style={{ minHeight: '300px' }} />
+          )}
+          
+          {/* Map Legend */}
+          <div className="p-3 bg-gray-50 border-t">
+            <div className="flex flex-wrap gap-3 text-xs">
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow"></div>
+                <span>Você</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white shadow"></div>
+                <span>Voluntários</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-4 rounded bg-green-500 border-2 border-white shadow"></div>
+                <span>Locais de Ajuda</span>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* List */}
-          <div className="space-y-3">
+        {/* List */}
+        <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-textPrimary">
                 {loading ? 'Buscando...' : `${totalResults} resultado${totalResults !== 1 ? 's' : ''} encontrado${totalResults !== 1 ? 's' : ''}`}
