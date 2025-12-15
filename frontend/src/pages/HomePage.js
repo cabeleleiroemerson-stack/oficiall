@@ -156,13 +156,23 @@ export default function HomePage() {
 
   const fetchAdvertisements = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/advertisements`);
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/sidebar-content`);
       if (response.ok) {
         const data = await response.json();
-        setAdvertisements(data);
+        setAdvertisements(data.items || []);
       }
     } catch (error) {
-      console.error('Error fetching advertisements:', error);
+      console.error('Error fetching sidebar content:', error);
+      // Fallback para anúncios simples
+      try {
+        const fallbackResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/advertisements`);
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          setAdvertisements(fallbackData);
+        }
+      } catch (e) {
+        console.error('Fallback also failed:', e);
+      }
     }
   };
 
