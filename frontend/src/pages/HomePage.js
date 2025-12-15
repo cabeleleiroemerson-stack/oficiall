@@ -619,9 +619,17 @@ export default function HomePage() {
                 <p className="text-sm sm:text-base text-textSecondary mb-3 leading-relaxed break-words">{post.description}</p>
 
                 {post.images && post.images.length > 0 && (
-                  <div className={`grid ${post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} gap-2 mb-3`}>
+                  <div className={`mb-3 ${post.images.length === 1 ? '' : 'grid grid-cols-2 gap-2'}`}>
                     {post.images.map((img, idx) => (
-                      <img key={idx} src={img} alt="" className="w-full h-48 object-cover rounded-2xl" />
+                      <div key={idx} className={`${post.images.length === 1 ? 'w-full' : ''} rounded-2xl overflow-hidden bg-gray-100`}>
+                        <img 
+                          src={img} 
+                          alt="" 
+                          className={`w-full ${post.images.length === 1 ? 'max-h-[500px] object-contain' : 'h-48 object-cover'} rounded-2xl`}
+                          onClick={() => window.open(img, '_blank')}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}
