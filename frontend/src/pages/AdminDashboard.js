@@ -171,6 +171,102 @@ export default function AdminDashboard() {
     }
   };
 
+  const saveAdvertisement = async () => {
+    if (!newAd.title || !newAd.content) {
+      toast.error('Preencha título e conteúdo');
+      return;
+    }
+
+    try {
+      const url = editingAd 
+        ? `${process.env.REACT_APP_BACKEND_URL}/api/admin/advertisements/${editingAd.id}`
+        : `${process.env.REACT_APP_BACKEND_URL}/api/admin/advertisements`;
+      
+      const response = await fetch(url, {
+        method: editingAd ? 'PUT' : 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newAd)
+      });
+
+      if (response.ok) {
+        toast.success(editingAd ? 'Anúncio atualizado!' : 'Anúncio criado!');
+        fetchAdvertisements();
+        setShowAdDialog(false);
+        setEditingAd(null);
+        setNewAd({
+          type: 'motivation',
+          title: '',
+          content: '',
+          image_url: '',
+          link_url: '',
+          link_text: '',
+          is_active: true,
+          priority: 5
+        });
+      } else {
+        toast.error('Erro ao salvar anúncio');
+      }
+    } catch (error) {
+      toast.error('Erro de conexão');
+    }
+  };
+
+  const deleteAdvertisement = async (adId) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/advertisements/${adId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        toast.success('Anúncio excluído!');
+        fetchAdvertisements();
+      } else {
+        toast.error('Erro ao excluir');
+      }
+    } catch (error) {
+      toast.error('Erro de conexão');
+    }
+  };
+
+  const editAdvertisement = (ad) => {
+    setEditingAd(ad);
+    setNewAd({
+      type: ad.type,
+      title: ad.title,
+      content: ad.content,
+      image_url: ad.image_url || '',
+      link_url: ad.link_url || '',
+      link_text: ad.link_text || '',
+      is_active: ad.is_active,
+      priority: ad.priority || 5
+    });
+    setShowAdDialog(true);
+  };
+
+  const toggleAdStatus = async (ad) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/advertisements/${ad.id}`, {
+        method: 'PUT',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_active: !ad.is_active })
+      });
+
+      if (response.ok) {
+        toast.success(ad.is_active ? 'Anúncio desativado' : 'Anúncio ativado');
+        fetchAdvertisements();
+      }
+    } catch (error) {
+      toast.error('Erro de conexão');
+    }
+  };
+
   const confirmDelete = (item, type) => {
     setItemToDelete(item);
     setDeleteType(type);
