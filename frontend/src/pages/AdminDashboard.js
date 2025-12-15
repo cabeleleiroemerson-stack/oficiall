@@ -8,7 +8,7 @@ import {
   Users, FileText, Link, MessageCircle, UserCheck, UserX, 
   Trash2, Search, Filter, BarChart3, PieChart, TrendingUp,
   Shield, AlertTriangle, CheckCircle, XCircle, Edit, Eye,
-  RefreshCw, Download, Settings, Home, ChevronRight
+  RefreshCw, Download, Settings, Home, ChevronRight, Megaphone, Plus, Image as ImageIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 
