@@ -698,7 +698,223 @@ export default function AdminDashboard() {
             )}
           </div>
         )}
+
+        {/* Ads Tab */}
+        {activeTab === 'ads' && (
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="bg-white rounded-2xl p-4 shadow-sm border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div>
+                <h2 className="text-lg font-bold text-textPrimary">Divulgações & Anúncios</h2>
+                <p className="text-sm text-textSecondary">Gerencie mensagens motivacionais e campanhas de doação</p>
+              </div>
+              <Button 
+                onClick={() => {
+                  setEditingAd(null);
+                  setNewAd({
+                    type: 'motivation',
+                    title: '',
+                    content: '',
+                    image_url: '',
+                    link_url: '',
+                    link_text: '',
+                    is_active: true,
+                    priority: 5
+                  });
+                  setShowAdDialog(true);
+                }}
+                className="rounded-xl bg-primary hover:bg-primary-hover"
+              >
+                <Plus size={18} className="mr-2" />
+                Nova Divulgação
+              </Button>
+            </div>
+
+            {/* Ads List */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {advertisements.map(ad => (
+                <div 
+                  key={ad.id} 
+                  className={`bg-white rounded-2xl shadow-sm border overflow-hidden ${!ad.is_active ? 'opacity-60' : ''}`}
+                >
+                  {ad.image_url && (
+                    <img src={ad.image_url} alt={ad.title} className="w-full h-32 object-cover" />
+                  )}
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                        ad.type === 'donation' ? 'bg-orange-100 text-orange-700' : 
+                        ad.type === 'motivation' ? 'bg-blue-100 text-blue-700' : 
+                        'bg-purple-100 text-purple-700'
+                      }`}>
+                        {ad.type === 'donation' ? '💰 Doação' : 
+                         ad.type === 'motivation' ? '💪 Motivação' : 
+                         '📢 Patrocinado'}
+                      </span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${ad.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {ad.is_active ? '✓ Ativo' : '○ Inativo'}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-sm text-textPrimary mb-1">{ad.title}</h3>
+                    <p className="text-xs text-textSecondary line-clamp-2 mb-3">{ad.content}</p>
+                    {ad.link_url && (
+                      <p className="text-xs text-primary mb-3 truncate">🔗 {ad.link_url}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => editAdvertisement(ad)}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 rounded-lg"
+                      >
+                        <Edit size={14} className="mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        onClick={() => toggleAdStatus(ad)}
+                        variant="outline"
+                        size="sm"
+                        className={`rounded-lg ${ad.is_active ? 'text-orange-600' : 'text-green-600'}`}
+                      >
+                        {ad.is_active ? <XCircle size={14} /> : <CheckCircle size={14} />}
+                      </Button>
+                      <Button
+                        onClick={() => deleteAdvertisement(ad.id)}
+                        variant="outline"
+                        size="sm"
+                        className="rounded-lg text-red-600"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {advertisements.length === 0 && (
+              <div className="text-center py-12 bg-white rounded-2xl">
+                <Megaphone size={48} className="mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500">Nenhuma divulgação cadastrada</p>
+                <Button 
+                  onClick={() => setShowAdDialog(true)}
+                  className="mt-4 rounded-xl"
+                >
+                  Criar primeira divulgação
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Ad Create/Edit Dialog */}
+      <Dialog open={showAdDialog} onOpenChange={setShowAdDialog}>
+        <DialogContent className="rounded-2xl max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Megaphone size={24} className="text-primary" />
+              {editingAd ? 'Editar Divulgação' : 'Nova Divulgação'}
+            </DialogTitle>
+            <DialogDescription>
+              Crie mensagens motivacionais ou campanhas de doação para exibir no feed
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Tipo</label>
+              <select
+                value={newAd.type}
+                onChange={(e) => setNewAd({...newAd, type: e.target.value})}
+                className="w-full p-2 border rounded-xl"
+              >
+                <option value="motivation">💪 Mensagem Motivacional</option>
+                <option value="donation">💰 Campanha de Doação</option>
+                <option value="sponsor">📢 Patrocinado</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Título</label>
+              <Input
+                value={newAd.title}
+                onChange={(e) => setNewAd({...newAd, title: e.target.value})}
+                placeholder="Ex: 💪 Você é mais forte do que imagina!"
+                className="rounded-xl"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Conteúdo</label>
+              <textarea
+                value={newAd.content}
+                onChange={(e) => setNewAd({...newAd, content: e.target.value})}
+                placeholder="Mensagem de motivação ou descrição da campanha..."
+                className="w-full p-3 border rounded-xl min-h-[100px] resize-none"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">URL da Imagem (opcional)</label>
+              <Input
+                value={newAd.image_url}
+                onChange={(e) => setNewAd({...newAd, image_url: e.target.value})}
+                placeholder="https://..."
+                className="rounded-xl"
+              />
+            </div>
+            {(newAd.type === 'donation' || newAd.type === 'sponsor') && (
+              <>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Link de Destino</label>
+                  <Input
+                    value={newAd.link_url}
+                    onChange={(e) => setNewAd({...newAd, link_url: e.target.value})}
+                    placeholder="https://..."
+                    className="rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Texto do Botão</label>
+                  <Input
+                    value={newAd.link_text}
+                    onChange={(e) => setNewAd({...newAd, link_text: e.target.value})}
+                    placeholder="Ex: Doar Agora"
+                    className="rounded-xl"
+                  />
+                </div>
+              </>
+            )}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={newAd.is_active}
+                  onChange={(e) => setNewAd({...newAd, is_active: e.target.checked})}
+                  className="w-4 h-4"
+                />
+                <label className="text-sm">Ativo</label>
+              </div>
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-1 block">Prioridade (1-20)</label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={newAd.priority}
+                  onChange={(e) => setNewAd({...newAd, priority: parseInt(e.target.value) || 5})}
+                  className="rounded-xl w-24"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-3 justify-end mt-6">
+            <Button variant="outline" onClick={() => setShowAdDialog(false)} className="rounded-xl">
+              Cancelar
+            </Button>
+            <Button onClick={saveAdvertisement} className="rounded-xl bg-primary hover:bg-primary-hover">
+              {editingAd ? 'Salvar Alterações' : 'Criar Divulgação'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
