@@ -130,6 +130,7 @@ export default function HomePage() {
   const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState('');
   const [commentingOn, setCommentingOn] = useState(null);
+  const [advertisements, setAdvertisements] = useState([]);
 
   const categories = [
     { value: 'food', label: t('food'), color: 'bg-green-100 text-green-700 border-green-200', icon: '🍽️' },
