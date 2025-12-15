@@ -416,71 +416,143 @@ export default function HomePage() {
 
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-7xl overflow-x-hidden">
         <div className="flex gap-4">
-          {/* Sidebar Esquerda - Anúncios (visível apenas em desktop) */}
-          <div className="hidden lg:block w-80 flex-shrink-0 space-y-4">
-            {/* Mensagens de Motivação */}
-            {advertisements.filter(ad => ad.type === 'motivation').slice(0, 3).map((ad, idx) => (
-              <div key={ad.id} className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
-                {ad.image_url && (
-                  <img 
-                    src={ad.image_url} 
-                    alt={ad.title} 
-                    className="w-full h-32 object-cover"
-                  />
-                )}
-                <div className="p-4">
-                  <h3 className="font-bold text-sm text-textPrimary mb-2">{ad.title}</h3>
-                  <p className="text-xs text-textSecondary leading-relaxed">{ad.content}</p>
-                </div>
-              </div>
-            ))}
+          {/* Sidebar Esquerda - Anúncios e Vagas (visível apenas em desktop) */}
+          <div className="hidden lg:block w-80 flex-shrink-0 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto scroll-container pr-2">
+            {/* Header da Sidebar */}
+            <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-2xl p-4 shadow-lg">
+              <h3 className="font-bold text-sm">📢 Oportunidades & Inspiração</h3>
+              <p className="text-xs text-white/80 mt-1">Vagas de emprego e mensagens para você</p>
+            </div>
 
-            {/* Anúncios de Doação */}
-            {advertisements.filter(ad => ad.type === 'donation').map((ad, idx) => (
-              <div key={ad.id} className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl shadow-md overflow-hidden border-2 border-orange-200">
-                {ad.image_url && (
-                  <img 
-                    src={ad.image_url} 
-                    alt={ad.title} 
-                    className="w-full h-40 object-cover"
-                  />
-                )}
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold px-2 py-1 bg-orange-500 text-white rounded-full">PATROCINADO</span>
+            {/* Renderizar todos os itens da sidebar */}
+            {advertisements.map((item, idx) => {
+              // Vaga de Emprego
+              if (item.type === 'job' || item.item_type === 'job') {
+                return (
+                  <div key={item.id || idx} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-md overflow-hidden border-2 border-blue-200 hover:border-blue-400 transition-all">
+                    {item.image_url && (
+                      <img 
+                        src={item.image_url} 
+                        alt={item.title} 
+                        className="w-full h-28 object-cover"
+                      />
+                    )}
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-bold px-2 py-1 bg-blue-600 text-white rounded-full">💼 VAGA</span>
+                        {item.source && (
+                          <span className="text-xs text-blue-600">{item.source}</span>
+                        )}
+                      </div>
+                      <h3 className="font-bold text-sm text-textPrimary mb-1 line-clamp-2">{item.title}</h3>
+                      <p className="text-xs text-textSecondary mb-3">{item.content}</p>
+                      {item.link_url && (
+                        <a 
+                          href={item.link_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="block w-full text-center py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-colors"
+                        >
+                          {item.link_text || 'Ver Vaga'} →
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <h3 className="font-bold text-sm text-textPrimary mb-2">{ad.title}</h3>
-                  <p className="text-xs text-textSecondary leading-relaxed mb-3">{ad.content}</p>
-                  {ad.link_url && (
-                    <a 
-                      href={ad.link_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="block w-full text-center py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-colors"
-                    >
-                      {ad.link_text || 'Saiba Mais'} →
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
+                );
+              }
+              
+              // Anúncio de Doação
+              if (item.type === 'donation') {
+                return (
+                  <div key={item.id || idx} className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl shadow-md overflow-hidden border-2 border-orange-200">
+                    {item.image_url && (
+                      <img 
+                        src={item.image_url} 
+                        alt={item.title} 
+                        className="w-full h-36 object-cover"
+                      />
+                    )}
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-bold px-2 py-1 bg-orange-500 text-white rounded-full">❤️ DOAÇÃO</span>
+                      </div>
+                      <h3 className="font-bold text-sm text-textPrimary mb-2">{item.title}</h3>
+                      <p className="text-xs text-textSecondary leading-relaxed mb-3">{item.content}</p>
+                      {item.link_url && (
+                        <a 
+                          href={item.link_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="block w-full text-center py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-colors"
+                        >
+                          {item.link_text || 'Doar Agora'} →
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+              
+              // Mensagem de Motivação
+              if (item.type === 'motivation') {
+                return (
+                  <div key={item.id || idx} className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
+                    {item.image_url && (
+                      <img 
+                        src={item.image_url} 
+                        alt={item.title} 
+                        className="w-full h-28 object-cover"
+                      />
+                    )}
+                    <div className="p-4">
+                      <h3 className="font-bold text-sm text-textPrimary mb-2">{item.title}</h3>
+                      <p className="text-xs text-textSecondary leading-relaxed">{item.content}</p>
+                    </div>
+                  </div>
+                );
+              }
 
-            {/* Mais Mensagens de Motivação */}
-            {advertisements.filter(ad => ad.type === 'motivation').slice(3).map((ad, idx) => (
-              <div key={ad.id} className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-md overflow-hidden border border-blue-100">
-                {ad.image_url && (
-                  <img 
-                    src={ad.image_url} 
-                    alt={ad.title} 
-                    className="w-full h-32 object-cover"
-                  />
-                )}
-                <div className="p-4">
-                  <h3 className="font-bold text-sm text-textPrimary mb-2">{ad.title}</h3>
-                  <p className="text-xs text-textSecondary leading-relaxed">{ad.content}</p>
+              // Patrocinado
+              return (
+                <div key={item.id || idx} className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-md overflow-hidden border border-purple-200">
+                  {item.image_url && (
+                    <img 
+                      src={item.image_url} 
+                      alt={item.title} 
+                      className="w-full h-32 object-cover"
+                    />
+                  )}
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-bold px-2 py-1 bg-purple-500 text-white rounded-full">📢 PATROCINADO</span>
+                    </div>
+                    <h3 className="font-bold text-sm text-textPrimary mb-2">{item.title}</h3>
+                    <p className="text-xs text-textSecondary leading-relaxed mb-3">{item.content}</p>
+                    {item.link_url && (
+                      <a 
+                        href={item.link_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block w-full text-center py-2 px-4 bg-purple-500 hover:bg-purple-600 text-white font-bold rounded-xl text-sm transition-colors"
+                      >
+                        {item.link_text || 'Saiba Mais'} →
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
+
+            {/* Link para mais vagas */}
+            <a 
+              href="https://rozgarline.me/jobs/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl p-4 text-center hover:shadow-lg transition-all"
+            >
+              <span className="font-bold">🔍 Ver Todas as Vagas</span>
+              <p className="text-xs text-white/80 mt-1">Acesse RozgarLine para mais oportunidades</p>
+            </a>
           </div>
 
           {/* Conteúdo Principal - Feed */}
