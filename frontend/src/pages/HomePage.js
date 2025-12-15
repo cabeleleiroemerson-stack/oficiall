@@ -546,7 +546,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="border-t pt-4 px-1">
+            <div className="border-t pt-4 px-1 flex-shrink-0 bg-white">
               <Button 
                 data-testid="submit-post-button"
                 onClick={createPost} 
