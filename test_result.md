@@ -243,9 +243,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Adicionar campo help_categories no registro de voluntário"
-    - "Filtrar posts baseado nas categorias do voluntário"
-    - "Endpoint can-chat para verificar permissão de chat"
+    - "Endpoint GET /api/help-locations - Lista locais de ajuda com filtro"
+    - "Endpoint GET /api/help-locations/nearest - Local mais próximo"
+    - "Endpoint GET /api/help-locations/categories - Lista categorias"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
