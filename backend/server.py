@@ -1159,6 +1159,149 @@ async def seed_advertisements():
     
     return {'message': f'{len(default_ads)} anúncios criados com sucesso', 'seeded': True}
 
+# ==================== JOB LISTINGS ENDPOINTS (RozgarLine Integration) ====================
+
+async def fetch_rozgarline_jobs():
+    """Busca vagas de emprego do site RozgarLine"""
+    jobs = []
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://rozgarline.me/', timeout=aiohttp.ClientTimeout(total=10)) as response:
+                if response.status == 200:
+                    html = await response.text()
+                    
+                    # Parse job listings from HTML usando regex
+                    # Pattern para encontrar vagas
+                    job_pattern = r'<a[^>]*href="(https://rozgarline\.me/jobs/[^"]+)"[^>]*>([^<]+)</a>'
+                    matches = re.findall(job_pattern, html)
+                    
+                    seen_titles = set()
+                    for url, title in matches:
+                        # Limpar título
+                        clean_title = title.strip()
+                        if clean_title and clean_title not in seen_titles and len(clean_title) > 5:
+                            # Ignorar links genéricos
+                            if 'more' not in clean_title.lower() and 'author' not in url:
+                                seen_titles.add(clean_title)
+                                jobs.append({
+                                    'id': str(uuid.uuid4()),
+                                    'title': clean_title,
+                                    'url': url,
+                                    'source': 'RozgarLine',
+                                    'location': 'Europa',
+                                    'date_posted': datetime.now(timezone.utc).strftime('%d %b %Y')
+                                })
+                    
+    except Exception as e:
+        logging.error(f"Error fetching jobs from RozgarLine: {e}")
+    
+    return jobs[:15]  # Limitar a 15 vagas
+
+@api_router.get("/jobs/external")
+async def get_external_jobs():
+    """Retorna vagas de emprego do RozgarLine"""
+    # Verificar cache
+    cached = await db.job_cache.find_one({'source': 'rozgarline'})
+    
+    # Se cache existe e tem menos de 1 hora, usar cache
+    if cached and cached.get('updated_at'):
+        cache_age = datetime.now(timezone.utc) - cached['updated_at']
+        if cache_age < timedelta(hours=1):
+            return {'jobs': cached.get('jobs', []), 'cached': True}
+    
+    # Buscar novas vagas
+    jobs = await fetch_rozgarline_jobs()
+    
+    # Salvar no cache
+    await db.job_cache.update_one(
+        {'source': 'rozgarline'},
+        {'$set': {
+            'source': 'rozgarline',
+            'jobs': jobs,
+            'updated_at': datetime.now(timezone.utc)
+        }},
+        upsert=True
+    )
+    
+    return {'jobs': jobs, 'cached': False}
+
+@api_router.get("/sidebar-content")
+async def get_sidebar_content():
+    """Retorna todo o conteúdo da sidebar: anúncios + vagas de emprego"""
+    
+    # Buscar anúncios ativos
+    ads = await db.advertisements.find({'is_active': True}, {'_id': 0}).sort('priority', -1).to_list(10)
+    
+    # Buscar vagas de emprego (do cache ou externo)
+    jobs_data = await get_external_jobs()
+    jobs = jobs_data.get('jobs', [])
+    
+    # Intercalar conteúdo: motivação, vaga, doação, vaga, motivação...
+    sidebar_items = []
+    
+    motivation_ads = [a for a in ads if a.get('type') == 'motivation']
+    donation_ads = [a for a in ads if a.get('type') == 'donation']
+    
+    # Adicionar 2 motivações primeiro
+    for i, ad in enumerate(motivation_ads[:2]):
+        sidebar_items.append({**ad, 'item_type': 'advertisement'})
+    
+    # Adicionar 3 vagas de emprego
+    for job in jobs[:3]:
+        sidebar_items.append({
+            'id': job['id'],
+            'item_type': 'job',
+            'type': 'job',
+            'title': f"💼 {job['title']}",
+            'content': f"📍 {job.get('location', 'Europa')} • {job.get('date_posted', 'Recente')}",
+            'link_url': job['url'],
+            'link_text': 'Ver Vaga',
+            'image_url': 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400',
+            'source': job.get('source', 'RozgarLine')
+        })
+    
+    # Adicionar doações
+    for ad in donation_ads[:2]:
+        sidebar_items.append({**ad, 'item_type': 'advertisement'})
+    
+    # Adicionar mais vagas
+    for job in jobs[3:6]:
+        sidebar_items.append({
+            'id': job['id'],
+            'item_type': 'job',
+            'type': 'job',
+            'title': f"💼 {job['title']}",
+            'content': f"📍 {job.get('location', 'Europa')} • {job.get('date_posted', 'Recente')}",
+            'link_url': job['url'],
+            'link_text': 'Ver Vaga',
+            'image_url': 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400',
+            'source': job.get('source', 'RozgarLine')
+        })
+    
+    # Adicionar mais motivações
+    for ad in motivation_ads[2:]:
+        sidebar_items.append({**ad, 'item_type': 'advertisement'})
+    
+    # Adicionar resto das vagas
+    for job in jobs[6:]:
+        sidebar_items.append({
+            'id': job['id'],
+            'item_type': 'job',
+            'type': 'job',
+            'title': f"💼 {job['title']}",
+            'content': f"📍 {job.get('location', 'Europa')} • {job.get('date_posted', 'Recente')}",
+            'link_url': job['url'],
+            'link_text': 'Candidatar',
+            'image_url': 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400',
+            'source': job.get('source', 'RozgarLine')
+        })
+    
+    return {
+        'items': sidebar_items,
+        'total_ads': len(ads),
+        'total_jobs': len(jobs)
+    }
+
 app.include_router(api_router)
 
 app.add_middleware(
