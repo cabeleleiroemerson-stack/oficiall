@@ -17,13 +17,35 @@ from pdf_processor import WatizatPDFProcessor
 from auto_responses import get_auto_response, format_auto_response_post
 from help_locations import HELP_LOCATIONS, get_all_help_locations, get_help_locations_by_category
 import math
+from urllib.parse import urlparse
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+
+# Extrai o nome do banco de dados da URL ou usa DB_NAME
+def get_database_name():
+    db_name = os.environ.get('DB_NAME', '')
+    if db_name and db_name != 'test_database':
+        return db_name
+    
+    # Tenta extrair da MONGO_URL
+    parsed = urlparse(mongo_url)
+    if parsed.path and len(parsed.path) > 1:
+        # Remove a barra inicial
+        extracted_db = parsed.path.lstrip('/')
+        # Remove parâmetros de query se existirem
+        if '?' in extracted_db:
+            extracted_db = extracted_db.split('?')[0]
+        if extracted_db:
+            return extracted_db
+    
+    # Fallback para o DB_NAME ou padrão
+    return db_name if db_name else 'watizat_db'
+
+db = client[get_database_name()]
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
