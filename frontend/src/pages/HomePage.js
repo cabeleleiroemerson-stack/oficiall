@@ -401,7 +401,7 @@ export default function HomePage() {
               {user?.role === 'migrant' ? 'Preciso de Ajuda' : 'Oferecer Ajuda'}
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-3xl max-w-2xl h-[90vh] sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden" data-testid="create-post-dialog">
+          <DialogContent className="rounded-3xl max-w-2xl max-h-[85vh] flex flex-col" data-testid="create-post-dialog">
             <DialogHeader className="pb-4 border-b flex-shrink-0">
               <DialogTitle className="text-2xl font-heading">
                 {newPost.type === 'need' ? '🆘 Preciso de Ajuda' : '🤝 Quero Ajudar'}
@@ -411,13 +411,32 @@ export default function HomePage() {
               </DialogDescription>
             </DialogHeader>
             <div 
-              className="flex-1 overflow-y-auto overscroll-contain px-1 -mx-1 touch-pan-y" 
+              className="flex-1 overflow-y-scroll px-2 py-2" 
               style={{ 
-                WebkitOverflowScrolling: 'touch',
-                minHeight: 0 
+                maxHeight: 'calc(85vh - 200px)',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#1CA9C9 #f1f1f1'
               }}
             >
-              <div className="space-y-6 py-4 px-1">
+              <style>
+                {`
+                  .scroll-container::-webkit-scrollbar {
+                    width: 8px;
+                  }
+                  .scroll-container::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 10px;
+                  }
+                  .scroll-container::-webkit-scrollbar-thumb {
+                    background: #1CA9C9;
+                    border-radius: 10px;
+                  }
+                  .scroll-container::-webkit-scrollbar-thumb:hover {
+                    background: #178ea8;
+                  }
+                `}
+              </style>
+              <div className="space-y-6 pr-2">
                 {/* Categoria */}
                 <div className="bg-gray-50 p-5 rounded-2xl">
                   <Label className="text-base font-bold mb-3 block">📂 Selecione a Categoria</Label>
