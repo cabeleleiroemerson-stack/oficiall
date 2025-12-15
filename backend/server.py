@@ -767,6 +767,177 @@ async def update_location(location_data: dict, current_user: User = Depends(get_
     await db.users.update_one({'id': current_user.id}, {'$set': update})
     return {'message': 'Location updated successfully'}
 
+# ==================== HELP LOCATIONS ENDPOINTS ====================
+
+def calculate_distance(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    """Calcula a distância em km entre duas coordenadas usando a fórmula de Haversine"""
+    R = 6371  # Raio da Terra em km
+    
+    lat1_rad = math.radians(lat1)
+    lat2_rad = math.radians(lat2)
+    delta_lat = math.radians(lat2 - lat1)
+    delta_lng = math.radians(lng2 - lng1)
+    
+    a = math.sin(delta_lat/2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lng/2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    
+    return R * c
+
+class HelpLocationResponse(BaseModel):
+    id: str
+    name: str
+    address: str
+    phone: Optional[str]
+    category: str
+    hours: Optional[str]
+    lat: float
+    lng: float
+    distance: Optional[float] = None
+    icon: Optional[str] = None
+    color: Optional[str] = None
+
+CATEGORY_ICONS = {
+    'food': {'icon': '🍽️', 'color': 'bg-green-500'},
+    'health': {'icon': '🏥', 'color': 'bg-red-500'},
+    'legal': {'icon': '⚖️', 'color': 'bg-blue-500'},
+    'housing': {'icon': '🏠', 'color': 'bg-purple-500'},
+    'clothes': {'icon': '👕', 'color': 'bg-orange-500'},
+    'social': {'icon': '🤝', 'color': 'bg-pink-500'},
+    'education': {'icon': '📚', 'color': 'bg-indigo-500'},
+    'work': {'icon': '💼', 'color': 'bg-yellow-500'}
+}
+
+@api_router.get("/help-locations")
+async def get_help_locations(
+    category: Optional[str] = None,
+    lat: Optional[float] = None,
+    lng: Optional[float] = None
+):
+    """
+    Retorna todos os locais de ajuda.
+    Pode filtrar por categoria e ordenar por distância se coordenadas forem fornecidas.
+    """
+    # Buscar locais do arquivo de dados
+    if category and category != 'all':
+        locations = get_help_locations_by_category(category)
+    else:
+        locations = get_all_help_locations()
+    
+    # Adicionar ícones e cores
+    result = []
+    for loc in locations:
+        loc_data = {**loc}
+        cat_info = CATEGORY_ICONS.get(loc['category'], {'icon': '📍', 'color': 'bg-gray-500'})
+        loc_data['icon'] = cat_info['icon']
+        loc_data['color'] = cat_info['color']
+        
+        # Calcular distância se coordenadas foram fornecidas
+        if lat is not None and lng is not None:
+            loc_data['distance'] = round(calculate_distance(lat, lng, loc['lat'], loc['lng']), 2)
+        
+        result.append(loc_data)
+    
+    # Ordenar por distância se aplicável
+    if lat is not None and lng is not None:
+        result.sort(key=lambda x: x.get('distance', float('inf')))
+    
+    return {'locations': result, 'total': len(result)}
+
+@api_router.get("/help-locations/nearest")
+async def get_nearest_help_location(
+    lat: float,
+    lng: float,
+    category: Optional[str] = None
+):
+    """
+    Retorna o local de ajuda mais próximo das coordenadas fornecidas.
+    Pode filtrar por categoria.
+    """
+    if category and category != 'all':
+        locations = get_help_locations_by_category(category)
+    else:
+        locations = get_all_help_locations()
+    
+    if not locations:
+        raise HTTPException(status_code=404, detail="Nenhum local encontrado")
+    
+    nearest = None
+    min_distance = float('inf')
+    
+    for loc in locations:
+        distance = calculate_distance(lat, lng, loc['lat'], loc['lng'])
+        if distance < min_distance:
+            min_distance = distance
+            cat_info = CATEGORY_ICONS.get(loc['category'], {'icon': '📍', 'color': 'bg-gray-500'})
+            nearest = {
+                **loc,
+                'distance': round(distance, 2),
+                'icon': cat_info['icon'],
+                'color': cat_info['color']
+            }
+    
+    return {'nearest': nearest}
+
+@api_router.get("/help-locations/categories")
+async def get_help_location_categories():
+    """Retorna todas as categorias disponíveis com contagem de locais"""
+    locations = get_all_help_locations()
+    
+    # Contar locais por categoria
+    category_counts = {}
+    for loc in locations:
+        cat = loc['category']
+        category_counts[cat] = category_counts.get(cat, 0) + 1
+    
+    # Formatar resposta com ícones
+    categories = [
+        {'value': 'all', 'label': 'Todos', 'icon': '🗺️', 'count': len(locations)}
+    ]
+    
+    category_labels = {
+        'food': 'Alimentação',
+        'health': 'Saúde',
+        'legal': 'Jurídico',
+        'housing': 'Moradia',
+        'clothes': 'Roupas',
+        'social': 'Social',
+        'education': 'Educação',
+        'work': 'Trabalho'
+    }
+    
+    for cat, count in sorted(category_counts.items()):
+        cat_info = CATEGORY_ICONS.get(cat, {'icon': '📍', 'color': 'bg-gray-500'})
+        categories.append({
+            'value': cat,
+            'label': category_labels.get(cat, cat.title()),
+            'icon': cat_info['icon'],
+            'color': cat_info['color'],
+            'count': count
+        })
+    
+    return {'categories': categories}
+
+@api_router.post("/help-locations/seed")
+async def seed_help_locations():
+    """Popula o banco de dados com os locais de ajuda (operação única)"""
+    locations = get_all_help_locations()
+    
+    # Verificar se já existem locais no banco
+    existing_count = await db.help_locations.count_documents({})
+    
+    if existing_count > 0:
+        return {'message': f'{existing_count} locais já existem no banco', 'seeded': False}
+    
+    # Inserir todos os locais
+    for loc in locations:
+        loc_with_metadata = {
+            **loc,
+            'created_at': datetime.now(timezone.utc)
+        }
+        await db.help_locations.insert_one(loc_with_metadata)
+    
+    return {'message': f'{len(locations)} locais adicionados com sucesso', 'seeded': True, 'count': len(locations)}
+
 app.include_router(api_router)
 
 app.add_middleware(
