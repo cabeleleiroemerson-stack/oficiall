@@ -147,11 +147,24 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchPosts();
+    fetchAdvertisements();
   }, []);
 
   useEffect(() => {
     filterPosts();
   }, [posts, categoryFilter, typeFilter]);
+
+  const fetchAdvertisements = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/advertisements`);
+      if (response.ok) {
+        const data = await response.json();
+        setAdvertisements(data);
+      }
+    } catch (error) {
+      console.error('Error fetching advertisements:', error);
+    }
+  };
 
   const filterPosts = () => {
     let filtered = posts;
